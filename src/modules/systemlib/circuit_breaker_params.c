@@ -142,6 +142,25 @@ PARAM_DEFINE_INT32(CBRK_ENGINEFAIL, 284953);
  */
 PARAM_DEFINE_INT32(CBRK_GPSFAIL, 0);
 
+
+/**
+ * Circuit breaker for Vicon failure detection
+ *
+ * Setting this parameter to 240048 will disable the Vicon failure detection.
+ * If this check is enabled, then the sensor check will fail if the Vicon module
+ * is missing. 
+ *
+ * WARNING: ENABLING THIS CIRCUIT BREAKER IS AT OWN RISK
+ *
+ * @reboot_required true
+ * @min 0
+ * @max 240048
+ * @group Circuit Breaker
+ */
+PARAM_DEFINE_INT32(CBRK_VICONFAIL, 0);
+
+
+
 /**
  * Circuit breaker for disabling buzzer
  *

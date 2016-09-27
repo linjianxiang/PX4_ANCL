@@ -199,6 +199,7 @@ private:
 		param_t acc_hor_max;
 		param_t alt_mode;
 		param_t opt_recover;
+		param_t mg;
 
 	}		_params_handles;		/**< handles for interesting parameters */
 
@@ -226,6 +227,7 @@ private:
 		uint32_t alt_mode;
 
 		int opt_recover;
+		float mg;
 
 		math::Vector<3> pos_p;
 		math::Vector<3> vel_p;
@@ -244,6 +246,7 @@ private:
 	bool _reset_pos_sp;
 	bool _reset_alt_sp;
 	bool _mode_auto;
+	bool _mode_ancl;
 	bool _pos_hold_engaged;
 	bool _alt_hold_engaged;
 	bool _run_pos_control;
@@ -257,6 +260,7 @@ private:
 	math::Vector<3> _vel_ff;
 	math::Vector<3> _vel_sp_prev;
 	math::Vector<3> _vel_err_d;		/**< derivative of current velocity */
+	math::Vector<3> _mg;
 
 	math::Matrix<3, 3> _R;			/**< rotation matrix from attitude quaternions */
 	float _yaw;				/**< yaw angle (euler) */
@@ -267,6 +271,7 @@ private:
 	float _acc_z_lp;
 	float _takeoff_thrust_sp;
 	bool control_vel_enabled_prev;	/**< previous loop was in velocity controlled mode (control_state.flag_control_velocity_enabled) */
+	float t_circle;
 
 	/**
 	 * Update our local parameter cache.
@@ -331,6 +336,8 @@ private:
 	 * Set position setpoint for AUTO
 	 */
 	void		control_auto(float dt);
+
+	void		control_ancl(float dt);
 
 	/**
 	 * Select between barometric and global (AMSL) altitudes
@@ -398,6 +405,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_reset_pos_sp(true),
 	_reset_alt_sp(true),
 	_mode_auto(false),
+	_mode_ancl(false),
 	_pos_hold_engaged(false),
 	_alt_hold_engaged(false),
 	_run_pos_control(true),
@@ -433,7 +441,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_vel_ff.zero();
 	_vel_sp_prev.zero();
 	_vel_err_d.zero();
-
+	_mg.zero();
 	_R.identity();
 
 	_params_handles.thr_min		= param_find("MPC_THR_MIN");
@@ -447,6 +455,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_params_handles.z_vel_d		= param_find("MPC_Z_VEL_D");
 	_params_handles.z_vel_max_up	= param_find("MPC_Z_VEL_MAX_UP");
 	_params_handles.z_vel_max_down	= param_find("MPC_Z_VEL_MAX");
+	_params_handles.mg		= param_find("MPC_MG");
 
 	// transitional support: Copy param values from max to down
 	// param so that max param can be renamed in 1-2 releases
@@ -619,6 +628,9 @@ MulticopterPositionControl::parameters_update(bool force)
 		/* takeoff and land velocities should not exceed maximum */
 		_params.tko_speed = fminf(_params.tko_speed, _params.vel_max_up);
 		_params.land_speed = fminf(_params.land_speed, _params.vel_max_down);
+
+		param_get(_params_handles.mg, &v);
+		_params.mg = v;
 	}
 
 	return OK;
@@ -1194,6 +1206,46 @@ void MulticopterPositionControl::control_auto(float dt)
 	}
 }
 
+void MulticopterPositionControl::control_ancl(float dt) {
+	
+	const static float r = 0.5f;
+	const static float omega = 0.5f;
+
+	if (!_mode_ancl) {
+		_mode_ancl = true;
+		t_circle=0;
+	}
+
+	if (_manual.ancl_switch == manual_control_setpoint_s::SWITCH_POS_MIDDLE) {
+		_pos_sp(0) = 0;
+		_pos_sp(1) = 0;
+		_pos_sp(2) = -1.0f;
+		_run_pos_control = true;
+		_run_alt_control = true;
+	} else if (_manual.ancl_switch == manual_control_setpoint_s::SWITCH_POS_OFF) {
+		_pos_sp(0) = r*((float)cos(t_circle*omega)-1.0f);
+		_pos_sp(1) = r*(float)sin(t_circle*omega);
+		_pos_sp(2) = -1.0f;
+		_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0) - r*omega*(float)sin(t_circle*omega);
+		_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1) + r*omega*(float)cos(t_circle*omega);
+		//_vel_sp(2)=0;
+		_run_pos_control = false;
+		_run_alt_control = true;
+		t_circle+=dt;
+		warnx("%3.3f:(%.3f,%.3f)",(double)t_circle,(double)_pos_sp(0),(double)_pos_sp(1));
+	} else 	if (_manual.ancl_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
+		//Should not be possible stay where we are
+		_reset_pos_sp = true;
+		_reset_alt_sp = true;
+	} else {
+		//Should not be possible staty where we are
+		_reset_pos_sp = true;
+		_reset_alt_sp = true;
+	}
+
+
+}
+
 void
 MulticopterPositionControl::task_main()
 {
@@ -1361,15 +1413,21 @@ MulticopterPositionControl::task_main()
 				/* manual control */
 				control_manual(dt);
 				_mode_auto = false;
+				_mode_ancl = false;
 
 			} else if (_control_mode.flag_control_offboard_enabled) {
 				/* offboard control */
 				control_offboard(dt);
 				_mode_auto = false;
+				_mode_ancl = false;
+			} else if (_control_mode.flag_control_ancl_enabled) {
+				control_ancl(dt);
+				_mode_auto = false;
 
 			} else {
 				/* AUTO */
 				control_auto(dt);
+				_mode_ancl = false;
 			}
 
 			/* weather-vane mode for vtol: disable yaw control */
@@ -1409,6 +1467,7 @@ MulticopterPositionControl::task_main()
 				_reset_pos_sp = true;
 				_reset_alt_sp = true;
 				_mode_auto = false;
+				_mode_ancl = false;
 				reset_int_z = true;
 				reset_int_xy = true;
 
@@ -1969,6 +2028,7 @@ MulticopterPositionControl::task_main()
 			_reset_alt_sp = true;
 			_reset_pos_sp = true;
 			_mode_auto = false;
+			_mode_ancl = false;
 			reset_int_z = true;
 			reset_int_xy = true;
 			control_vel_enabled_prev = false;

@@ -58,7 +58,8 @@
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vision_position_estimate.h>
-#include <uORB/topics/att_pos_mocap.h>
+//#include <uORB/topics/att_pos_mocap.h>
+#include <uORB/topics/vicon.h>
 #include <uORB/topics/airspeed.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/estimator_status.h>
@@ -122,7 +123,8 @@ private:
 	int		_sensors_sub = -1;
 	int		_params_sub = -1;
 	int		_vision_sub = -1;
-	int		_mocap_sub = -1;
+//	int		_mocap_sub = -1;
+	int		_vicon_sub = -1;
 	int		_airspeed_sub = -1;
 	int		_global_pos_sub = -1;
 	orb_advert_t	_att_pub = nullptr;
@@ -149,6 +151,7 @@ private:
 	float		_mag_decl = 0.0f;
 	bool		_mag_decl_auto = false;
 	bool		_acc_comp = false;
+	bool		_acc_comp_vicon = false;
 	float		_bias_max = 0.0f;
 	int		_ext_hdg_mode = 0;
 	int 	_airspeed_mode = 0;
@@ -160,8 +163,10 @@ private:
 	vision_position_estimate_s _vision = {};
 	Vector<3>	_vision_hdg;
 
-	att_pos_mocap_s _mocap = {};
-	Vector<3>	_mocap_hdg;
+	//att_pos_mocap_s _mocap = {};
+	//Vector<3>	_mocap_hdg;
+	vicon_s _vicon = {};
+	Vector<3> _vicon_hdg;
 
 	airspeed_s _airspeed = {};
 
@@ -295,7 +300,8 @@ void AttitudeEstimatorQ::task_main()
 	_sensors_sub = orb_subscribe(ORB_ID(sensor_combined));
 
 	_vision_sub = orb_subscribe(ORB_ID(vision_position_estimate));
-	_mocap_sub = orb_subscribe(ORB_ID(att_pos_mocap));
+	//_mocap_sub = orb_subscribe(ORB_ID(att_pos_mocap));
+	_vicon_sub = orb_subscribe(ORB_ID(vicon));
 
 	_airspeed_sub = orb_subscribe(ORB_ID(airspeed));
 
@@ -370,8 +376,10 @@ void AttitudeEstimatorQ::task_main()
 		bool vision_updated = false;
 		orb_check(_vision_sub, &vision_updated);
 
-		bool mocap_updated = false;
-		orb_check(_mocap_sub, &mocap_updated);
+		//bool mocap_updated = false;
+		//orb_check(_mocap_sub, &mocap_updated);
+		bool vicon_updated = false;
+		orb_check(_vicon_sub, &vicon_updated);
 
 		if (vision_updated) {
 			orb_copy(ORB_ID(vision_position_estimate), _vision_sub, &_vision);
@@ -386,17 +394,24 @@ void AttitudeEstimatorQ::task_main()
 			_vision_hdg = Rvis.transposed() * v;
 		}
 
-		if (mocap_updated) {
-			orb_copy(ORB_ID(att_pos_mocap), _mocap_sub, &_mocap);
-			math::Quaternion q(_mocap.q);
-			math::Matrix<3, 3> Rmoc = q.to_dcm();
+		//if (mocap_updated) {
+		//	orb_copy(ORB_ID(att_pos_mocap), _mocap_sub, &_mocap);
+		//	math::Quaternion q(_mocap.q);
+		//	math::Matrix<3, 3> Rmoc = q.to_dcm();
 
-			math::Vector<3> v(1.0f, 0.0f, 0.4f);
+		//	math::Vector<3> v(1.0f, 0.0f, 0.4f);
 
 			// Rmoc is Rwr (robot respect to world) while v is respect to world.
 			// Hence Rmoc must be transposed having (Rwr)' * Vw
 			// Rrw * Vw = vn. This way we have consistency
-			_mocap_hdg = Rmoc.transposed() * v;
+		//	_mocap_hdg = Rmoc.transposed() * v;
+		//}
+		if (vicon_updated) {
+			orb_copy(ORB_ID(vicon),_vicon_sub,&_vicon);
+			math::Quaternion q(_vicon.q);
+			math::Matrix<3,3> Rmoc = q.to_dcm();
+			math::Vector<3> v(1.0f,0.0f,0.4f);
+			_vicon_hdg = Rmoc.transposed() * v;
 		}
 
 		// Update airspeed
@@ -412,7 +427,8 @@ void AttitudeEstimatorQ::task_main()
 			_ext_hdg_good = _vision.timestamp > 0 && (hrt_elapsed_time(&_vision.timestamp) < 500000);
 
 		} else if (_ext_hdg_mode == 2) {
-			_ext_hdg_good = _mocap.timestamp > 0 && (hrt_elapsed_time(&_mocap.timestamp) < 500000);
+//			_ext_hdg_good = _mocap.timestamp > 0 && (hrt_elapsed_time(&_mocap.timestamp) < 500000);
+			_ext_hdg_good = (hrt_elapsed_time(&_vicon.t_local) < 500000);
 		}
 
 		bool gpos_updated;
@@ -443,6 +459,16 @@ void AttitudeEstimatorQ::task_main()
 				_vel_prev = vel;
 			}
 
+		} else if(_acc_comp_vicon && hrt_absolute_time() < _vicon.t_local + 2000) {
+			if (vicon_updated) {
+				Vector<3> vel(_vicon.vx,_vicon.vy,_vicon.vz);
+				if (_vel_prev_t != 0 && _vicon.t_local != _vel_prev_t ) {
+					float vel_dt = (_vicon.t_local - _vel_prev_t) / 1000000.0f;
+					_pos_acc = _q.conjugate_inversed((vel-_vel_prev) / vel_dt);
+				}
+				_vel_prev_t = _gpos.timestamp;
+				_vel_prev = vel;
+			}
 		} else {
 			/* position data is outdated, reset acceleration */
 			_pos_acc.zero();
@@ -568,7 +594,8 @@ void AttitudeEstimatorQ::task_main()
 
 	orb_unsubscribe(_sensors_sub);
 	orb_unsubscribe(_vision_sub);
-	orb_unsubscribe(_mocap_sub);
+//	orb_unsubscribe(_mocap_sub);
+	orb_unsubscribe(_vicon_sub);
 	orb_unsubscribe(_airspeed_sub);
 	orb_unsubscribe(_params_sub);
 	orb_unsubscribe(_global_pos_sub);
@@ -599,6 +626,7 @@ void AttitudeEstimatorQ::update_parameters(bool force)
 		int32_t acc_comp_int;
 		param_get(_params_handles.acc_comp, &acc_comp_int);
 		_acc_comp = acc_comp_int != 0;
+		_acc_comp_vicon = acc_comp_int==3;
 		param_get(_params_handles.bias_max, &_bias_max);
 		param_get(_params_handles.ext_hdg_mode, &_ext_hdg_mode);
 		param_get(_params_handles.airspeed_mode, &_airspeed_mode);
@@ -676,7 +704,8 @@ bool AttitudeEstimatorQ::update(float dt)
 		if (_ext_hdg_mode == 2) {
 			// Mocap heading correction
 			// Project heading to global frame and extract XY component
-			Vector<3> mocap_hdg_earth = _q.conjugate(_mocap_hdg);
+			//Vector<3> mocap_hdg_earth = _q.conjugate(_mocap_hdg);
+			Vector<3> mocap_hdg_earth = _q.conjugate(_vicon_hdg);
 			float mocap_hdg_err = _wrap_pi(atan2f(mocap_hdg_earth(1), mocap_hdg_earth(0)));
 			// Project correction to body frame
 			corr += _q.conjugate_inversed(Vector<3>(0.0f, 0.0f, -mocap_hdg_err)) * _w_ext_hdg;

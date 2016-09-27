@@ -219,18 +219,6 @@ then
 	fi
 fi
 
-if meas_airspeed start
-then
-else
-	if ets_airspeed start
-	then
-	else
-		if ets_airspeed start -b 1
-		then
-		fi
-	fi
-fi
-
 if sf1xx start
 then
 fi

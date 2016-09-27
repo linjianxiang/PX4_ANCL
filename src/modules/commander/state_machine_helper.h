@@ -71,6 +71,7 @@ struct status_flags_s {
 	bool condition_local_altitude_valid;
 	bool condition_airspeed_valid;			// set to true by the commander app if there is a valid airspeed measurement available
 	bool condition_power_input_valid;		// set if input power is valid
+	bool condition_vicon_valid;
 	bool usb_connected;				// status of the USB power supply
 	bool circuit_breaker_engaged_power_check;
 	bool circuit_breaker_engaged_airspd_check;
@@ -78,6 +79,7 @@ struct status_flags_s {
 	bool circuit_breaker_engaged_gpsfailure_check;
 	bool circuit_breaker_flight_termination_disabled;
 	bool circuit_breaker_engaged_usb_check;
+	bool circuit_breaker_engaged_viconfailure_check;
 	bool offboard_control_signal_found_once;
 	bool offboard_control_signal_lost;
 	bool offboard_control_signal_weak;
@@ -91,6 +93,8 @@ struct status_flags_s {
 	bool vtol_transition_failure_cmd;		// Set to true if vtol transition failure mode is commanded
 	bool gps_failure;				// Set to true if a gps failure is detected
 	bool gps_failure_cmd;				// Set to true if a gps failure mode is commanded
+	bool vicon_failure;
+	bool vicon_failure_cmd;
 	bool barometer_failure;				// Set to true if a barometer failure is detected
 };
 

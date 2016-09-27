@@ -485,6 +485,10 @@ then
 		fi
 	fi
 
+	# TODO
+	#mavlink start -d /dev/ttyS1 -b 115200 -m vicon -r 115200
+	#mavlink start -d /dev/ttyS2 -b 921600 -m onboard -r 80000 -x
+
 	if [ $MAVLINK_F == default ]
 	then
 		# Normal mode, use baudrate 57600 (default) and data rate 1000 bytes/s
@@ -763,6 +767,10 @@ then
 				set MAV_TYPE 2
 			fi
 			if [ $MIXER == quad_h ]
+			then
+				set MAV_TYPE 2
+			fi
+			if [ $MIXER == quad_ancl ]
 			then
 				set MAV_TYPE 2
 			fi

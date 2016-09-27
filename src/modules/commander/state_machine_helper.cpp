@@ -426,7 +426,10 @@ main_state_transition(struct vehicle_status_s *status, main_state_t new_main_sta
 		}
 
 		break;
-
+	case commander_state_s::MAIN_STATE_AUTO_ANCL:
+		if (status_flags->condition_vicon_valid)
+			ret = TRANSITION_CHANGED;
+		break;
 	case commander_state_s::MAIN_STATE_MAX:
 	default:
 		break;
@@ -1074,7 +1077,8 @@ bool set_nav_state(struct vehicle_status_s *status, struct commander_state_s *in
 		} else {
 			status->nav_state = vehicle_status_s::NAVIGATION_STATE_OFFBOARD;
 		}
-
+	case commander_state_s::MAIN_STATE_AUTO_ANCL:
+		status->nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_ANCL;
 	default:
 		break;
 	}

@@ -127,6 +127,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_follow_target_pub(nullptr),
 	_transponder_report_pub(nullptr),
 	_gps_inject_data_pub(nullptr),
+	_vicon_pub(nullptr),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
 	_hil_frames(0),
 	_old_timestamp(0),
@@ -265,6 +266,9 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_SERIAL_CONTROL:
 		handle_message_serial_control(msg);
 		break;
+	
+	case MAVLINK_MSG_ID_VICONQ:
+		handle_message_vicon(msg);
 
 	default:
 		break;
@@ -1884,6 +1888,38 @@ void MavlinkReceiver::handle_message_gps_rtcm_data(mavlink_message_t *msg)
 		orb_publish(ORB_ID(gps_inject_data), pub, &gps_inject_data_topic);
 	}
 
+}
+
+void MavlinkReceiver::handle_message_vicon(mavlink_message_t *msg)
+{
+	mavlink_viconq_t vicon;
+	mavlink_msg_viconq_decode(msg,&vicon);
+
+	if (msg->sysid!=_mavlink->get_system_id()) {
+		warnx("WRONG SYSTEM ID");
+	}
+
+	struct vicon_s v;
+	memset(&v,0,sizeof(v));
+
+	v.t_remote = ((uint64_t)vicon.usec)*1000;
+	v.t_local = hrt_absolute_time();
+	v.x=(float)vicon.x/1000.0f;
+	v.y=(float)vicon.y/1000.0f;
+	v.z=(float)vicon.z/1000.0f;
+	v.vx=(float)vicon.vx/1000.0f;
+	v.vy=(float)vicon.vy/1000.0f;
+	v.vz=(float)vicon.vz/1000.0f;
+	v.q[0]=(float)vicon.q0/20000.0f;
+	v.q[1]=(float)vicon.q1/20000.0f;
+	v.q[2]=(float)vicon.q2/20000.0f;
+	v.q[3]=(float)vicon.q3/20000.0f;
+
+	if (_vicon_pub == nullptr) {
+		_vicon_pub = orb_advertise(ORB_ID(vicon),&v);
+	} else {
+		orb_publish(ORB_ID(vicon),_vicon_pub,&v);
+	}
 }
 
 void

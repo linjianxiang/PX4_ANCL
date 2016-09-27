@@ -105,6 +105,7 @@
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vtol_vehicle_status.h>
+#include <uORB/topics/vicon.h>
 #include <uORB/uORB.h>
 
 /* oddly, ERROR is not defined for c++ */
@@ -140,6 +141,7 @@ static constexpr uint8_t COMMANDER_MAX_GPS_NOISE = 60;		/**< Maximum percentage 
 #define FAILSAFE_DEFAULT_TIMEOUT	(3 * 1000 * 1000)	/**< hysteresis time - the failsafe will trigger after 3 seconds in this state */
 #define OFFBOARD_TIMEOUT		500000
 #define DIFFPRESS_TIMEOUT		2000000
+#define VICON_TIMEOUT			(     250 * 1000) //Vicon timeout after 250 ms
 
 #define HOTPLUG_SENS_TIMEOUT		(8 * 1000 * 1000)	/**< wait for hotplug sensors to come online for upto 8 seconds */
 
@@ -1339,6 +1341,7 @@ int commander_thread_main(int argc, char *argv[])
 	status_flags.circuit_breaker_engaged_airspd_check = false;
 	status_flags.circuit_breaker_engaged_enginefailure_check = false;
 	status_flags.circuit_breaker_engaged_gpsfailure_check = false;
+	status_flags.circuit_breaker_engaged_viconfailure_check = false;
 	get_circuit_breaker_params();
 
 	/* publish initial state */
@@ -1486,6 +1489,10 @@ int commander_thread_main(int argc, char *argv[])
 	memset(&gps_position, 0, sizeof(gps_position));
 	gps_position.eph = FLT_MAX;
 	gps_position.epv = FLT_MAX;
+
+	int vicon_sub = orb_subscribe(ORB_ID(vicon));
+	struct vicon_s vicon;
+	memset(&vicon,0,sizeof(vicon));
 
 	/* Subscribe to sensor topic */
 	int sensor_sub = orb_subscribe(ORB_ID(sensor_combined));
@@ -2272,6 +2279,30 @@ int commander_thread_main(int argc, char *argv[])
 			}
 		}
 
+		orb_check(vicon_sub, &updated);
+
+		if (updated) {
+			orb_copy(ORB_ID(vicon),vicon_sub,&vicon);
+		}
+
+		if (!status_flags.circuit_breaker_engaged_viconfailure_check) {
+			if (hrt_elapsed_time(&vicon.t_local) < VICON_TIMEOUT) {
+				if (status_flags.vicon_failure) {
+					status_flags.vicon_failure = false;
+					status_flags.condition_vicon_valid = true;
+					status_changed = true;
+					mavlink_log_critical(&mavlink_log_pub, "Vicon regained");
+					set_tune_override(TONE_STOP_TUNE);
+				}
+			} else if (!status_flags.vicon_failure) {
+				status_flags.vicon_failure = true;
+				status_flags.condition_vicon_valid = false;
+				status_changed = true;
+				mavlink_log_critical(&mavlink_log_pub, "Vicon lost");
+				set_tune_override(TONE_BATTERY_WARNING_SLOW_TUNE);
+			}
+		}
+
 		/* start mission result check */
 		orb_check(mission_result_sub, &updated);
 
@@ -2963,6 +2994,7 @@ get_circuit_breaker_params()
 	status_flags.circuit_breaker_engaged_enginefailure_check = circuit_breaker_enabled("CBRK_ENGINEFAIL", CBRK_ENGINEFAIL_KEY);
 	status_flags.circuit_breaker_engaged_gpsfailure_check = circuit_breaker_enabled("CBRK_GPSFAIL", CBRK_GPSFAIL_KEY);
 	status_flags.circuit_breaker_flight_termination_disabled = circuit_breaker_enabled("CBRK_FLIGHTTERM", CBRK_FLIGHTTERM_KEY);
+	status_flags.circuit_breaker_engaged_viconfailure_check = circuit_breaker_enabled("CBRK_VICONFAIL",CBRK_VICONFAIL_KEY);
 }
 
 void
@@ -3346,7 +3378,21 @@ set_main_state_rc(struct vehicle_status_s *status_local)
 		break;
 
 	case manual_control_setpoint_s::SWITCH_POS_ON:			// AUTO
-		if (sp_man.loiter_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
+		//ANCL -- Geoff
+		if (sp_man.ancl_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
+			res = main_state_transition(status_local, commander_state_s::MAIN_STATE_POSCTL, main_state_prev, &status_flags, &internal_state);
+			if (res != TRANSITION_DENIED) {
+				break; // changed successfully or already in this state
+			}
+			print_reject_mode(status_local, "AUTO ANCL PAUSE");
+		} else { //MIDDLE or OFF
+			res = main_state_transition(status_local,commander_state_s::MAIN_STATE_AUTO_ANCL, main_state_prev, &status_flags, &internal_state);
+			if (res != TRANSITION_DENIED) {
+				break; // changed successfully or already in this state
+			}
+			print_reject_mode(status_local, "AUTO ANCL");
+		}
+		/*if (sp_man.loiter_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
 			res = main_state_transition(status_local, commander_state_s::MAIN_STATE_AUTO_LOITER, main_state_prev, &status_flags, &internal_state);
 
 			if (res != TRANSITION_DENIED) {
@@ -3370,7 +3416,7 @@ set_main_state_rc(struct vehicle_status_s *status_local)
 			if (res != TRANSITION_DENIED) {
 				break;  // changed successfully or already in this state
 			}
-		}
+		}*/
 
 		// fallback to POSCTL
 		res = main_state_transition(status_local, commander_state_s::MAIN_STATE_POSCTL, main_state_prev, &status_flags, &internal_state);
@@ -3420,6 +3466,7 @@ set_control_mode()
 		control_mode.flag_control_velocity_enabled = false;
 		control_mode.flag_control_acceleration_enabled = false;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_STAB:
@@ -3436,6 +3483,7 @@ set_control_mode()
 		control_mode.flag_control_termination_enabled = false;
 		/* override is not ok in stabilized mode */
 		control_mode.flag_external_manual_override_ok = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_RATTITUDE:
@@ -3450,6 +3498,7 @@ set_control_mode()
 		control_mode.flag_control_velocity_enabled = false;
 		control_mode.flag_control_acceleration_enabled = false;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_ALTCTL:
@@ -3464,6 +3513,7 @@ set_control_mode()
 		control_mode.flag_control_velocity_enabled = false;
 		control_mode.flag_control_acceleration_enabled = false;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_POSCTL:
@@ -3478,6 +3528,7 @@ set_control_mode()
 		control_mode.flag_control_velocity_enabled = !status.in_transition_mode;
 		control_mode.flag_control_acceleration_enabled = false;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_AUTO_RTL:
@@ -3503,6 +3554,7 @@ set_control_mode()
 		control_mode.flag_control_velocity_enabled = !status.in_transition_mode;
 		control_mode.flag_control_acceleration_enabled = false;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_AUTO_LANDGPSFAIL:
@@ -3517,6 +3569,7 @@ set_control_mode()
 		control_mode.flag_control_velocity_enabled = false;
 		control_mode.flag_control_acceleration_enabled = false;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_ACRO:
@@ -3531,6 +3584,7 @@ set_control_mode()
 		control_mode.flag_control_velocity_enabled = false;
 		control_mode.flag_control_acceleration_enabled = false;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_DESCEND:
@@ -3546,6 +3600,7 @@ set_control_mode()
 		control_mode.flag_control_altitude_enabled = false;
 		control_mode.flag_control_climb_rate_enabled = true;
 		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_TERMINATION:
@@ -3561,13 +3616,14 @@ set_control_mode()
 		control_mode.flag_control_altitude_enabled = false;
 		control_mode.flag_control_climb_rate_enabled = false;
 		control_mode.flag_control_termination_enabled = true;
+		control_mode.flag_control_ancl_enabled = false;
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_OFFBOARD:
 		control_mode.flag_control_manual_enabled = false;
 		control_mode.flag_control_auto_enabled = false;
 		control_mode.flag_control_offboard_enabled = true;
-
+		control_mode.flag_control_ancl_enabled = false;
 		/*
 		 * The control flags depend on what is ignored according to the offboard control mode topic
 		 * Inner loop flags (e.g. attitude) also depend on outer loop ignore flags (e.g. position)
@@ -3602,7 +3658,20 @@ set_control_mode()
 			!offboard_control_mode.ignore_position) && !control_mode.flag_control_acceleration_enabled;
 
 		break;
-
+	case vehicle_status_s::NAVIGATION_STATE_AUTO_ANCL:
+		control_mode.flag_control_manual_enabled = false;
+		control_mode.flag_control_auto_enabled = false;
+		control_mode.flag_control_rates_enabled = false;
+		control_mode.flag_control_attitude_enabled = false;
+		control_mode.flag_control_rattitude_enabled = false;
+		control_mode.flag_control_position_enabled = false;
+		control_mode.flag_control_velocity_enabled = false;
+		control_mode.flag_control_acceleration_enabled = false;
+		control_mode.flag_control_altitude_enabled = false;
+		control_mode.flag_control_climb_rate_enabled = false;
+		control_mode.flag_control_termination_enabled = false;
+		control_mode.flag_control_ancl_enabled = true;
+		break;
 	default:
 		break;
 	}
