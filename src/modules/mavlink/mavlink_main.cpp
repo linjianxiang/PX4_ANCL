@@ -1791,6 +1791,8 @@ Mavlink::task_main(int argc, char *argv[])
 
 			} else if (strcmp(myoptarg, "config") == 0) {
 				_mode = MAVLINK_MODE_CONFIG;
+			} else if (strcmp(myoptarg, "vicon") == 0) {
+				_mode = MAVLINK_MODE_VICON;
 			}
 
 			break;
@@ -2048,6 +2050,11 @@ Mavlink::task_main(int argc, char *argv[])
 		configure_stream("MISSION_ITEM", 50.0f);
 		configure_stream("ACTUATOR_CONTROL_TARGET0", 30.0f);
 		configure_stream("MANUAL_CONTROL", 5.0f);
+		configure_stream("VICON",30.0f);
+	case MAVLINK_MODE_VICON:
+		//stream nothing
+		//maybe add heartbeat?
+		break;
 
 	default:
 		break;

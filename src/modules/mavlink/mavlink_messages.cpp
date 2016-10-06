@@ -89,6 +89,7 @@
 #include <uORB/topics/vision_position_estimate.h>
 #include <uORB/topics/vtol_vehicle_status.h>
 #include <uORB/topics/wind_estimate.h>
+#include <uORB/topics/vicon.h>
 #include <uORB/uORB.h>
 
 
@@ -3444,6 +3445,85 @@ protected:
 	}
 };
 
+class MavlinkStreamVicon : public MavlinkStream
+{
+public:
+	const char *get_name() const
+	{
+		return MavlinkStreamVicon::get_name_static();
+	}
+
+	static const char *get_name_static()
+	{
+		return "VICON";
+	}
+
+	static uint8_t get_id_static()
+	{
+		return MAVLINK_MSG_ID_VICONQ;
+	}
+
+	uint8_t get_id()
+	{
+		return get_id_static();
+	}
+
+	static MavlinkStream *new_instance(Mavlink *mavlink)
+	{
+		return new MavlinkStreamVicon(mavlink);
+	}
+
+	unsigned get_size()
+	{
+		return (_vicon_time > 0) ? MAVLINK_MSG_ID_VICONQ_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES : 0;
+	}
+
+private:
+	MavlinkOrbSubscription *_vicon_sub;
+	uint64_t _vicon_time;
+
+
+	/* do not allow top copying this class */
+	MavlinkStreamVicon(MavlinkStreamVicon &);
+	MavlinkStreamVicon &operator = (const MavlinkStreamVicon &);
+
+protected:
+	explicit MavlinkStreamVicon(Mavlink *mavlink) : MavlinkStream(mavlink),
+		_vicon_sub(_mavlink->add_orb_subscription(ORB_ID(vicon))),
+		_vicon_time(0)
+	{}
+
+	void send(const hrt_abstime t)
+	{
+		struct vicon_s vicon = {};
+
+		bool updated = _vicon_sub->update(&_vicon_time, &vicon);
+
+		if (updated) {
+
+			mavlink_viconq_t msg = {};
+
+			msg.usec = (uint32_t)vicon.timestamp;
+
+			msg.x = (int16_t)(vicon.x*1000);
+			msg.y = (int16_t)(vicon.y*1000);
+			msg.z = (int16_t)(vicon.z*1000);
+
+			msg.vx = (int16_t)(vicon.vx*1000);
+			msg.vy = (int16_t)(vicon.vy*1000);
+			msg.vz = (int16_t)(vicon.vz*1000);
+
+			msg.q0 = (int16_t)(vicon.q[0]*20000);
+			msg.q1 = (int16_t)(vicon.q[1]*20000);
+			msg.q2 = (int16_t)(vicon.q[2]*20000);
+			msg.q3 = (int16_t)(vicon.q[3]*20000);
+
+
+			mavlink_msg_viconq_send_struct(_mavlink->get_channel(), &msg);
+		}
+	}
+};
+
 const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamHeartbeat::new_instance, &MavlinkStreamHeartbeat::get_name_static, &MavlinkStreamHeartbeat::get_id_static),
 	new StreamListItem(&MavlinkStreamStatustext::new_instance, &MavlinkStreamStatustext::get_name_static, &MavlinkStreamStatustext::get_id_static),
@@ -3488,5 +3568,6 @@ const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamAltitude::new_instance, &MavlinkStreamAltitude::get_name_static, &MavlinkStreamAltitude::get_id_static),
 	new StreamListItem(&MavlinkStreamADSBVehicle::new_instance, &MavlinkStreamADSBVehicle::get_name_static, &MavlinkStreamADSBVehicle::get_id_static),
 	new StreamListItem(&MavlinkStreamWind::new_instance, &MavlinkStreamWind::get_name_static, &MavlinkStreamWind::get_id_static),
+	new StreamListItem(&MavlinkStreamVicon::new_instance, &MavlinkStreamVicon::get_name_static, &MavlinkStreamVicon::get_id_static),
 	nullptr
 };
