@@ -411,6 +411,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 
 			if (!magnometerCheck(mavlink_log_pub, i, !required, device_id, reportFailures) && required) {
 				failed = true;
+				PX4_WARN("Mag check failed");
 			}
 
 			if (device_id == prime_id) {
@@ -424,6 +425,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 				mavlink_log_critical(mavlink_log_pub, "Warning: Primary compass not found");
 			}
 			failed = true;
+			PX4_WARN("No primary mag");
 		}
 	}
 
@@ -440,6 +442,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 
 			if (!accelerometerCheck(mavlink_log_pub, i, !required, checkDynamic, device_id, reportFailures) && required) {
 				failed = true;
+				PX4_WARN("Acc check failed");
 			}
 
 			if (device_id == prime_id) {
@@ -453,6 +456,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 				mavlink_log_critical(mavlink_log_pub, "Warning: Primary accelerometer not found");
 			}
 			failed = true;
+			PX4_WARN("no primary acc");
 		}
 	}
 
@@ -469,6 +473,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 
 			if (!gyroCheck(mavlink_log_pub, i, !required, device_id, reportFailures) && required) {
 				failed = true;
+				PX4_WARN("gyro check failed");
 			}
 
 			if (device_id == prime_id) {
@@ -482,6 +487,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 				mavlink_log_critical(mavlink_log_pub, "Warning: Primary gyro not found");
 			}
 			failed = true;
+			PX4_WARN("no primary gyro found");
 		}
 	}
 
@@ -498,6 +504,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 
 			if (!baroCheck(mavlink_log_pub, i, !required, device_id, reportFailures) && required) {
 				failed = true;
+				PX4_WARN("baro check failed");
 			}
 
 			if (device_id == prime_id) {
@@ -512,6 +519,7 @@ bool preflightCheck(orb_advert_t *mavlink_log_pub, bool checkMag, bool checkAcc,
 				mavlink_log_critical(mavlink_log_pub, "warning: primary barometer not operational");
 			}
 			failed = true;
+			PX4_WARN("no primary baro found");
 		}
 	}
 

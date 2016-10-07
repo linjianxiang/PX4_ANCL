@@ -1089,6 +1089,7 @@ bool set_nav_state(struct vehicle_status_s *status, struct commander_state_s *in
 int preflight_check(struct vehicle_status_s *status, orb_advert_t *mavlink_log_pub, bool prearm, bool force_report,
 		    status_flags_s *status_flags, battery_status_s *battery, bool can_arm_without_gps)
 {
+
 	/*
 	 */
 	bool reportFailures = force_report || (!status_flags->condition_system_prearm_error_reported &&
@@ -1101,6 +1102,8 @@ int preflight_check(struct vehicle_status_s *status, orb_advert_t *mavlink_log_p
 	if (!status_flags->circuit_breaker_engaged_airspd_check && (!status->is_rotary_wing || status->is_vtol)) {
 		checkAirspeed = true;
 	}
+
+
 
 	bool preflight_ok = Commander::preflightCheck(mavlink_log_pub, true, true, true, true,
 			    checkAirspeed, (status->rc_input_mode == vehicle_status_s::RC_IN_MODE_DEFAULT),

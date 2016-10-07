@@ -484,99 +484,100 @@ then
 	fi
 
 	# TODO
-	mavlink start -d /dev/ttyS1 -b 115200 -m vicon -r 115200
+	mavlink start -d /dev/ttyS2 -b 115200 -m vicon -r 115200
+	mavlink start -d /dev/ttyS1 -b 230400 -m config -r 230400
 	#mavlink start -d /dev/ttyS2 -b 921600 -m onboard -r 80000 -x
 
-	if [ $MAVLINK_F == default ]
-	then
-		# Normal mode, use baudrate 57600 (default) and data rate 1000 bytes/s
-		if [ $TTYS1_BUSY == yes ]
-		then
-			# Start MAVLink on ttyS0, because FMU ttyS1 pins configured as something else
-			set MAVLINK_F "-r 1200 -d /dev/ttyS0"
+#	if [ $MAVLINK_F == default ]
+#	then
+#		# Normal mode, use baudrate 57600 (default) and data rate 1000 bytes/s
+#		if [ $TTYS1_BUSY == yes ]
+#		then
+#			# Start MAVLink on ttyS0, because FMU ttyS1 pins configured as something else
+#			set MAVLINK_F "-r 1200 -d /dev/ttyS0"
+#
+#			# Exit from nsh to free port for mavlink
+#			set EXIT_ON_END yes
+#		else
+#			set MAVLINK_F "-r 1200"
+#			# Avoid using ttyS1 for MAVLink on FMUv4
+#			if ver hwcmp PX4FMU_V4
+#			then
+#				set MAVLINK_F "-r 1200 -d /dev/ttyS1"
+#				# Start MAVLink on Wifi (ESP8266 port)
+#				mavlink start -r 20000 -m config -b 921600 -d /dev/ttyS0
+#			fi
+#		fi
+#
+#		if ver hwcmp CRAZYFLIE
+#		then
+#			# Avoid using either of the two available serials
+#			set MAVLINK_F none
+#		fi
+#	fi
 
-			# Exit from nsh to free port for mavlink
-			set EXIT_ON_END yes
-		else
-			set MAVLINK_F "-r 1200"
-			# Avoid using ttyS1 for MAVLink on FMUv4
-			if ver hwcmp PX4FMU_V4
-			then
-				set MAVLINK_F "-r 1200 -d /dev/ttyS1"
-				# Start MAVLink on Wifi (ESP8266 port)
-				#mavlink start -r 20000 -m config -b 921600 -d /dev/ttyS0
-			fi
-		fi
+#	if [ $MAVLINK_F == "none" ]
+#	then
+#	else
+#		mavlink start $MAVLINK_F
+#	fi
+#	unset MAVLINK_F
 
-		if ver hwcmp CRAZYFLIE
-		then
-			# Avoid using either of the two available serials
-			set MAVLINK_F none
-		fi
-	fi
-
-	if [ $MAVLINK_F == "none" ]
-	then
-	else
-		#mavlink start $MAVLINK_F
-	fi
-	unset MAVLINK_F
-
-	#
-	# MAVLink onboard / TELEM2
-	#
-	if ver hwcmp PX4FMU_V1
-	then
-	else
-		# XXX We need a better way for runtime eval of shell variables,
-		# but this works for now
-		if param compare SYS_COMPANION 10
-		then
-			frsky_telemetry start -d /dev/ttyS2
-		fi
-		if param compare SYS_COMPANION 20
-		then
-			syslink start
-			#mavlink start -d /dev/bridge0 -b 57600 -m osd -r 40000
-		fi
-		if param compare SYS_COMPANION 921600
-		then
-			#mavlink start -d /dev/ttyS2 -b 921600 -m onboard -r 80000 -x
-		fi
-		if param compare SYS_COMPANION 57600
-		then
-			#mavlink start -d /dev/ttyS2 -b 57600 -m onboard -r 5000 -x
-		fi
-		if param compare SYS_COMPANION 157600
-		then
-			#mavlink start -d /dev/ttyS2 -b 57600 -m osd -r 1000
-		fi
-		if param compare SYS_COMPANION 257600
-		then
-			#mavlink start -d /dev/ttyS2 -b 57600 -m magic -r 5000 -x
-		fi
-		if param compare SYS_COMPANION 357600
-		then
-			#mavlink start -d /dev/ttyS2 -b 57600 -r 1000
-		fi
-		if param compare SYS_COMPANION 1921600
-		then
-			#mavlink start -d /dev/ttyS2 -b 921600 -r 20000
-		fi
-		# Sensors on the PWM interface bank
-		# clear pins 5 and 6
-		if param compare SENS_EN_LL40LS 1
-		then
-			set FMU_MODE pwm4
-			set AUX_MODE pwm4
-		fi
-		if param greater TRIG_MODE 0
-		then
-			set FMU_MODE pwm4
-			set AUX_MODE pwm4
-			camera_trigger start
-		fi
-	fi
+#	#
+#	# MAVLink onboard / TELEM2
+#	#
+#	if ver hwcmp PX4FMU_V1
+#	then
+#	else
+#		# XXX We need a better way for runtime eval of shell variables,
+#		# but this works for now
+#		if param compare SYS_COMPANION 10
+#		then
+#			frsky_telemetry start -d /dev/ttyS2
+#		fi
+#		if param compare SYS_COMPANION 20
+#		then
+#			syslink start
+#			mavlink start -d /dev/bridge0 -b 57600 -m osd -r 40000
+#		fi
+#		if param compare SYS_COMPANION 921600
+#		then
+#			mavlink start -d /dev/ttyS2 -b 921600 -m onboard -r 80000 -x
+#		fi
+#		if param compare SYS_COMPANION 57600
+#		then
+#			mavlink start -d /dev/ttyS2 -b 57600 -m onboard -r 5000 -x
+#		fi
+#		if param compare SYS_COMPANION 157600
+#		then
+#			mavlink start -d /dev/ttyS2 -b 57600 -m osd -r 1000
+#		fi
+#		if param compare SYS_COMPANION 257600
+#		then
+#			mavlink start -d /dev/ttyS2 -b 57600 -m magic -r 5000 -x
+#		fi
+#		if param compare SYS_COMPANION 357600
+#		then
+#			mavlink start -d /dev/ttyS2 -b 57600 -r 1000
+#		fi
+#		if param compare SYS_COMPANION 1921600
+#		then
+#			mavlink start -d /dev/ttyS2 -b 921600 -r 20000
+#		fi
+#		# Sensors on the PWM interface bank
+#		# clear pins 5 and 6
+#		if param compare SENS_EN_LL40LS 1
+#		then
+#			set FMU_MODE pwm4
+#			set AUX_MODE pwm4
+#		fi
+#		if param greater TRIG_MODE 0
+#		then
+#			set FMU_MODE pwm4
+#			set AUX_MODE pwm4
+#			camera_trigger start
+#		fi
+#	fi
 
 	#
 	# Starting stuff according to UAVCAN_ENABLE value
@@ -640,7 +641,7 @@ then
 	if ver hwcmp PX4FMU_V2
 	then
 		# Check for flow sensor - as it is a background task, launch it last
-		px4flow start &
+		#px4flow start &
 	fi
 
 	if ver hwcmp MINDPX_V2
@@ -670,7 +671,6 @@ then
 		# Try to get an USB console
 		nshterm /dev/ttyACM0 &
 	else
-		#nshterm /dev/ttyACM0 &
 		mavlink start -r 800000 -d /dev/ttyACM0 -m config -x
 	fi
 

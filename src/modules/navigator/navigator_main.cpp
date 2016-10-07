@@ -162,7 +162,7 @@ Navigator::Navigator() :
 	_param_rcloss_act(this, "RCL_ACT"),
 	_param_cruising_speed_hover(this, "MPC_XY_CRUISE", false),
 	_param_cruising_speed_plane(this, "FW_AIRSPD_TRIM", false),
-	_param_cruising_throttle_plane(this, "FW_THR_CRUISE", false),
+	//_param_cruising_throttle_plane(this, "FW_THR_CRUISE", false),
 	_mission_cruising_speed(-1.0f),
 	_mission_throttle(-1.0f)
 {
@@ -751,7 +751,8 @@ Navigator::get_cruising_throttle()
 	if (_mission_throttle > 0.0f) {
 		return _mission_throttle;
 	} else {
-		return _param_cruising_throttle_plane.get();
+		return 0.0f;
+		//return _param_cruising_throttle_plane.get();
 	}
 }
 

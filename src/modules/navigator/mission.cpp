@@ -73,8 +73,8 @@ Mission::Mission(Navigator *navigator, const char *name) :
 	_param_dist_1wp(this, "MIS_DIST_1WP", false),
 	_param_altmode(this, "MIS_ALTMODE", false),
 	_param_yawmode(this, "MIS_YAWMODE", false),
-	_param_force_vtol(this, "VT_NAV_FORCE_VT", false),
-	_param_fw_climbout_diff(this, "FW_CLMBOUT_DIFF", false),
+	//_param_force_vtol(this, "VT_NAV_FORCE_VT", false),
+	//_param_fw_climbout_diff(this, "FW_CLMBOUT_DIFF", false),
 	_onboard_mission{},
 	_offboard_mission{},
 	_current_onboard_mission_index(-1),
@@ -487,11 +487,11 @@ Mission::set_mission_items()
 	if (item_contains_position(&_mission_item)) {
 
 		/* force vtol land */
-		if (_mission_item.nav_cmd == NAV_CMD_LAND && _navigator->get_vstatus()->is_vtol
+		/*if (_mission_item.nav_cmd == NAV_CMD_LAND && _navigator->get_vstatus()->is_vtol
 		    && _param_force_vtol.get() && !_navigator->get_vstatus()->is_rotary_wing) {
 
 			_mission_item.nav_cmd = NAV_CMD_VTOL_LAND;
-		}
+		}*/
 
 		/* we have a new position item so set previous position setpoint to current */
 		set_previous_pos_setpoint();
@@ -993,7 +993,7 @@ Mission::do_abort_landing()
 	// Abort FW landing
 	//  turn the land waypoint into a loiter and stay there
 
-	if (_mission_item.nav_cmd != NAV_CMD_LAND) {
+	/*if (_mission_item.nav_cmd != NAV_CMD_LAND) {
 		return;
 	}
 
@@ -1025,7 +1025,7 @@ Mission::do_abort_landing()
 	// move mission index back 1 (landing approach point) so that re-entering
 	//  the mission doesn't try to land from the loiter above land
 	// TODO: reset index to MAV_CMD_DO_LAND_START
-	_current_offboard_mission_index -= 1;
+	_current_offboard_mission_index -= 1;*/
 }
 
 bool

@@ -1966,6 +1966,7 @@ Mavlink::task_main(int argc, char *argv[])
 		configure_stream("NAMED_VALUE_FLOAT", 1.0f);
 		configure_stream("VFR_HUD", 4.0f);
 		configure_stream("WIND_COV", 1.0f);
+			configure_stream("VICON",30.0f);
 		break;
 
 	case MAVLINK_MODE_ONBOARD:
@@ -1998,6 +1999,7 @@ Mavlink::task_main(int argc, char *argv[])
 		//camera trigger is rate limited at the source, do not limit here
 		configure_stream("CAMERA_TRIGGER", 500.0f);
 		configure_stream("ACTUATOR_CONTROL_TARGET0", 10.0f);
+		configure_stream("VICON",100.0f);
 		break;
 
 	case MAVLINK_MODE_OSD:

@@ -3503,7 +3503,7 @@ protected:
 
 			mavlink_viconq_t msg = {};
 
-			msg.usec = (uint32_t)vicon.timestamp;
+			msg.usec = (uint32_t)(vicon.t_remote/1000);
 
 			msg.x = (int16_t)(vicon.x*1000);
 			msg.y = (int16_t)(vicon.y*1000);

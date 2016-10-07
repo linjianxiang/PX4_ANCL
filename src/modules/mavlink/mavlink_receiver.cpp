@@ -266,7 +266,7 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_SERIAL_CONTROL:
 		handle_message_serial_control(msg);
 		break;
-	
+
 	case MAVLINK_MSG_ID_VICONQ:
 		handle_message_vicon(msg);
 
@@ -1902,6 +1902,7 @@ void MavlinkReceiver::handle_message_vicon(mavlink_message_t *msg)
 	struct vicon_s v;
 	memset(&v,0,sizeof(v));
 
+  v.timestamp = hrt_absolute_time();
 	v.t_remote = ((uint64_t)vicon.usec)*1000;
 	v.t_local = hrt_absolute_time();
 	v.x=(float)vicon.x/1000.0f;
