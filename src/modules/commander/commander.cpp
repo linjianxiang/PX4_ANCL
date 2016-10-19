@@ -1360,7 +1360,7 @@ int commander_thread_main(int argc, char *argv[])
 	}
 
 	// initialize vicon failure to false if circuit breaker enabled
-	if (status_flags.circuit_breaker_engaged_viconfailute_check) {
+	if (status_flags.circuit_breaker_engaged_viconfailure_check) {
 		status_flags.vicon_failure = false;
 	} else {
 		status_flags.vicon_failure = true;
