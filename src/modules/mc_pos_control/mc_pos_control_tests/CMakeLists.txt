@@ -31,14 +31,12 @@
 #
 ############################################################################
 px4_add_module(
-	MODULE examples__fixedwing_control
-	MAIN ex_fixedwing_control
-	STACK_MAIN 1200
-	STACK_MAX 1300
+	MODULE modules__mc_pos_control__mc_pos_control_tests
+	MAIN mc_pos_control_tests
 	SRCS
-		main.cpp
-		params.c
+		mc_pos_control_tests.cpp
+		../mc_pos_control_main.cpp
 	DEPENDS
 		platforms__common
 	)
-# vim: set noet ft=cmake fenc=utf-8 ff=unix : 
+# vim: set noet ft=cmake fenc=utf-8 ff=unix :

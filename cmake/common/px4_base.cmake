@@ -678,6 +678,8 @@ function(px4_add_common_flags)
 		message(STATUS "address sanitizer enabled")
 		if ("${OS}" STREQUAL "nuttx")
 			set(max_optimization -Os)
+		elseif (${BOARD} STREQUAL "bebop")
+			set(max_optimization -Os)
 		endif()
 
 		# Do not use optimization_flags (without _) as that is already used.
@@ -691,6 +693,8 @@ function(px4_add_common_flags)
 			)
 	else()
 		if ("${OS}" STREQUAL "nuttx")
+			set(max_optimization -Os)
+		elseif (${BOARD} STREQUAL "bebop")
 			set(max_optimization -Os)
 		else()
 			set(max_optimization -O2)
@@ -809,9 +813,14 @@ function(px4_add_common_flags)
 
 	string(TOUPPER ${BOARD} board_upper)
 	string(REPLACE "-" "_" board_config ${board_upper})
+	set (added_target_definitions)
+	if (NOT ${target_definitions})
+	    px4_prepend_string(OUT added_target_definitions STR "-D" LIST ${target_definitions})
+	endif()
 	set(added_definitions
 		-DCONFIG_ARCH_BOARD_${board_config}
 		-D__STDC_FORMAT_MACROS
+		${added_target_definitions}
 		)
 
 	if (NOT (APPLE AND (${CMAKE_C_COMPILER_ID} MATCHES ".*Clang.*")))
