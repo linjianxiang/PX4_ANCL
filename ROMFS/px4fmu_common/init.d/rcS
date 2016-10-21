@@ -516,7 +516,7 @@ then
 #		fi
 #	fi
 
-#	if [ $MAVLINK_F == "none" ]
+#	if [ "x$MAVLINK_F" == xnone ]
 #	then
 #	else
 #		mavlink start $MAVLINK_F

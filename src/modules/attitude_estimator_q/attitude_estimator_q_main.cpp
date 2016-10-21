@@ -461,7 +461,7 @@ void AttitudeEstimatorQ::task_main()
 
 		} else if(_acc_comp_vicon && hrt_absolute_time() < _vicon.t_local + 2000) {
 			if (vicon_updated) {
-				Vector<3> vel(_vicon.vx,_vicon.vy,_vicon.vz);
+				Vector<3> vel(_vicon.v);
 				if (_vel_prev_t != 0 && _vicon.t_local != _vel_prev_t ) {
 					float vel_dt = (_vicon.t_local - _vel_prev_t) / 1000000.0f;
 					_pos_acc = _q.conjugate_inversed((vel-_vel_prev) / vel_dt);

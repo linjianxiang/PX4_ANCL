@@ -1,12 +1,6 @@
 uint64 t_remote			#Timestamp
 uint64 t_local			#Timestamp
 
-float32 x			# X position in meters in NED earth-fixed frame
-float32 y			# Y position in meters in NED earth-fixed frame
-float32 z			# Z position in meters in NED earth-fixed frame (negative altitude)
-
-float32 vx			# X velocity in meters per second in NED earth-fixed frame
-float32 vy			# Y velocity in meters per second in NED earth-fixed frame
-float32 vz			# Z velocity in meters per second in NED earth-fixed frame
-
-float32[4] q			# Estimated attitude as quaternion
+float32[3] p			# position (x,y,z) in meters in NED earth-fixed frame
+float32[3] v			# velocity (vx,vy,vz) in meters per second in NED earth-fixed frame
+float32[4] q			# Estimated attitude as quaternion q0 is real

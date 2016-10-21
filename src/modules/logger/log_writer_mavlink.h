@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013 - 2015 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2016 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,66 +31,57 @@
  *
  ****************************************************************************/
 
-/**
- * @file vicon.cpp
- * Vicon Status information.
- *
- * @author Geoff <gfink@ualbert.ca>
- */
+#pragma once
 
-#include <px4_config.h>
-#include <px4_defines.h>
-#include <px4_tasks.h>
-#include <px4_posix.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <math.h>
-#include <poll.h>
-#include <functional>
-#include <drivers/drv_hrt.h>
-#include <arch/board/board.h>
+#include <stdint.h>
+#include <uORB/topics/ulog_stream.h>
+#include <uORB/topics/ulog_stream_ack.h>
 
-#include <uORB/topics/vicon.h>
-
-
-/**
- *
- *
- * @ingroup apps
- */
-extern "C" __EXPORT int vicon_main(int argc, char *argv[]);
-
-
-int vicon_main(int argc, char *argv[])
+namespace px4
 {
-	int sub=-1;
-	struct vicon_s data;
-	memset(&data,0,sizeof(data));
+namespace logger
+{
 
-	if (argc < 2) {
-		warnx("usage: vicon {status}");
-		return 1;
+/**
+ * @class LogWriterMavlink
+ * Writes logging data to uORB, and then sent via mavlink
+ */
+class LogWriterMavlink
+{
+public:
+	LogWriterMavlink(unsigned int queue_size);
+	~LogWriterMavlink();
+
+	bool init();
+
+	void start_log();
+
+	void stop_log();
+
+	bool is_started() const { return _is_started; }
+
+	/** @see LogWriter::write_message() */
+	int write_message(void *ptr, size_t size);
+
+	void set_need_reliable_transfer(bool need_reliable);
+
+	bool need_reliable_transfer() const
+	{
+		return _need_reliable_transfer;
 	}
 
-	if (!strcmp(argv[1], "status")) {
-		sub = orb_subscribe(ORB_ID(vicon));
-		if (sub>0) {
-			orb_copy(ORB_ID(vicon), sub, &data);
-			PX4_INFO("Vicon:");
-			PX4_INFO("pos: (%2.3f,%2.3f,%2.3f)",(double)data.p[0],(double)data.p[1],(double)data.p[2]);
-			PX4_INFO("vel: (%2.3f,%2.3f,%2.3f)",(double)data.v[0],(double)data.v[2],(double)data.v[2]);
-			PX4_INFO("q: (%2.3f,%2.3f,%2.3f,%2.3f)",(double)data.q[0],(double)data.q[1],(double)data.q[2],(double)data.q[3]);
-			PX4_INFO("received @ %" PRIu64 " / %" PRIu64 "\n      sent @ %" PRIu64, data.t_local, hrt_absolute_time(), data.t_remote);
-			sub = orb_unsubscribe(sub);
-		} else {
-			PX4_INFO("Could not subscribe to Vicon topic");
-		}
-		return 0;
-	}
-	warnx("unrecognized command");
-	return 1;
+private:
+
+	/** publish message, wait for ack if needed & reset message */
+	int publish_message();
+
+	ulog_stream_s _ulog_stream_data;
+	orb_advert_t _ulog_stream_pub = nullptr;
+	int _ulog_stream_ack_sub = -1;
+	bool _need_reliable_transfer = false;
+	bool _is_started = false;
+	const unsigned int _queue_size;
+};
+
+}
 }

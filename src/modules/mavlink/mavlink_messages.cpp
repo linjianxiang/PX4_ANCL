@@ -2585,7 +2585,11 @@ protected:
 			mavlink_attitude_target_t msg{};
 
 			msg.time_boot_ms = att_sp.timestamp / 1000;
-			mavlink_euler_to_quaternion(att_sp.roll_body, att_sp.pitch_body, att_sp.yaw_body, msg.q);
+			if (att_sp.q_d_valid) {
+				memcpy(&msg.q[0], &att_sp.q_d[0], sizeof(msg.q));
+			} else {
+				mavlink_euler_to_quaternion(att_sp.roll_body, att_sp.pitch_body, att_sp.yaw_body, msg.q);
+			}
 
 			msg.body_roll_rate = att_rates_sp.roll;
 			msg.body_pitch_rate = att_rates_sp.pitch;
@@ -3514,19 +3518,12 @@ protected:
 
 			msg.usec = (uint32_t)(vicon.t_remote/1000);
 
-			msg.x = (int16_t)(vicon.x*1000);
-			msg.y = (int16_t)(vicon.y*1000);
-			msg.z = (int16_t)(vicon.z*1000);
-
-			msg.vx = (int16_t)(vicon.vx*1000);
-			msg.vy = (int16_t)(vicon.vy*1000);
-			msg.vz = (int16_t)(vicon.vz*1000);
-
-			msg.q0 = (int16_t)(vicon.q[0]*20000);
-			msg.q1 = (int16_t)(vicon.q[1]*20000);
-			msg.q2 = (int16_t)(vicon.q[2]*20000);
-			msg.q3 = (int16_t)(vicon.q[3]*20000);
-
+			for (int i=0;i<3;i++) {
+				msg.p[i] = (int16_t)(vicon.p[i]*1000);
+				msg.v[i] = (int16_t)(vicon.v[i]*1000);
+				msg.q[i] = (int16_t)(vicon.q[i]*20000);
+			}
+			msg.q[3] = (int16_t)(vicon.q[3]*20000);
 
 			mavlink_msg_viconq_send_struct(_mavlink->get_channel(), &msg);
 		}
