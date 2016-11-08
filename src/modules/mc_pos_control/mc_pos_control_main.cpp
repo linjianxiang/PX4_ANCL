@@ -61,7 +61,6 @@
 #include <errno.h>
 #include <math.h>
 #include <poll.h>
-#include <functional>
 #include <drivers/drv_hrt.h>
 #include <arch/board/board.h>
 
@@ -950,9 +949,15 @@ MulticopterPositionControl::control_offboard(float dt)
 			_att_sp.yaw_body = _att_sp.yaw_body + _pos_sp_triplet.current.yawspeed * dt;
 		}
 
-		if (_control_mode.flag_control_altitude_enabled && _pos_sp_triplet.current.position_valid) {
-			/* Control altitude */
+		if (_control_mode.flag_control_altitude_enabled && _pos_sp_triplet.current.alt_valid) {
+			/* control altitude as it is enabled */
 			_pos_sp(2) = _pos_sp_triplet.current.z;
+			_run_alt_control = true;
+
+		} else if (_control_mode.flag_control_altitude_enabled && _pos_sp_triplet.current.position_valid) {
+			/* control altitude because full position control is enabled */
+			_pos_sp(2) = _pos_sp_triplet.current.z;
+			_run_alt_control = true;
 
 		} else if (_control_mode.flag_control_climb_rate_enabled && _pos_sp_triplet.current.velocity_valid) {
 			/* reset alt setpoint to current altitude if needed */
@@ -1295,6 +1300,9 @@ MulticopterPositionControl::task_main()
 
 	/* get an initial update for all sensor and status data */
 	poll_subscriptions();
+
+	/* We really need to know from the beginning if we're landed or in-air. */
+	orb_copy(ORB_ID(vehicle_land_detected), _vehicle_land_detected_sub, &_vehicle_land_detected);
 
 	bool reset_int_z = true;
 	bool reset_int_z_manual = false;

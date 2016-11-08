@@ -77,7 +77,9 @@
 #include <uORB/topics/follow_target.h>
 #include <uORB/topics/transponder_report.h>
 #include <uORB/topics/gps_inject_data.h>
+#include <uORB/topics/control_state.h>
 #include <uORB/topics/vicon.h>
+
 
 #include "mavlink_ftp.h"
 
@@ -221,6 +223,7 @@ private:
 	orb_advert_t _time_offset_pub;
 	orb_advert_t _follow_target_pub;
 	orb_advert_t _transponder_report_pub;
+	orb_advert_t _control_state_pub;
 	static const int _gps_inject_data_queue_size = 6;
 	orb_advert_t _gps_inject_data_pub;
 	orb_advert_t _vicon_pub;

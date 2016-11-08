@@ -54,7 +54,6 @@
 #include <poll.h>
 #include <termios.h>
 #include <time.h>
-#include <math.h> /* isinf / isnan checks */
 
 #ifdef __PX4_POSIX
 #include <net/if.h>
@@ -2364,6 +2363,11 @@ Mavlink::task_main(int argc, char *argv[])
 	if (_forwarding_on || _ftp_on) {
 		message_buffer_destroy();
 		pthread_mutex_destroy(&_message_buffer_mutex);
+	}
+
+	if (_mavlink_ulog) {
+		_mavlink_ulog->stop();
+		_mavlink_ulog = nullptr;
 	}
 
 	warnx("exiting channel %i", (int)_channel);

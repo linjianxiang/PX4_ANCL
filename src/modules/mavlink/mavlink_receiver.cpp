@@ -126,6 +126,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_time_offset_pub(nullptr),
 	_follow_target_pub(nullptr),
 	_transponder_report_pub(nullptr),
+	_control_state_pub(nullptr),
 	_gps_inject_data_pub(nullptr),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
 	_hil_frames(0),
@@ -394,6 +395,7 @@ MavlinkReceiver::handle_message_command_long(mavlink_message_t *msg)
 				// not even running. The main mavlink thread takes care of this by waiting for an ack
 				// from the logger.
 				_mavlink->try_start_ulog_streaming(msg->sysid, msg->compid);
+
 			} else if (cmd_mavlink.command == MAV_CMD_LOGGING_STOP) {
 				_mavlink->request_stop_ulog_streaming();
 			}
@@ -752,6 +754,7 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 
 		/* convert mavlink type (local, NED) to uORB offboard control struct */
 		offboard_control_mode.ignore_position = (bool)(set_position_target_local_ned.type_mask & 0x7);
+		offboard_control_mode.ignore_alt_hold = (bool)(set_position_target_local_ned.type_mask & 0x4);
 		offboard_control_mode.ignore_velocity = (bool)(set_position_target_local_ned.type_mask & 0x38);
 		offboard_control_mode.ignore_acceleration_force = (bool)(set_position_target_local_ned.type_mask & 0x1C0);
 		bool is_force_sp = (bool)(set_position_target_local_ned.type_mask & (1 << 9));
@@ -847,6 +850,14 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 
 					} else {
 						pos_sp_triplet.current.velocity_valid = false;
+					}
+
+					if (!offboard_control_mode.ignore_alt_hold) {
+						pos_sp_triplet.current.alt_valid = true;
+						pos_sp_triplet.current.z = set_position_target_local_ned.z;
+
+					} else {
+						pos_sp_triplet.current.alt_valid = false;
 					}
 
 					/* set the local acceleration values if the setpoint type is 'local pos' and none
@@ -1245,6 +1256,7 @@ MavlinkReceiver::handle_message_logging_ack(mavlink_message_t *msg)
 	mavlink_msg_logging_ack_decode(msg, &logging_ack);
 
 	MavlinkULog *ulog_streaming = _mavlink->get_ulog_streaming();
+
 	if (ulog_streaming) {
 		ulog_streaming->handle_ack(logging_ack);
 	}
@@ -2117,6 +2129,68 @@ MavlinkReceiver::handle_message_hil_state_quaternion(mavlink_message_t *msg)
 		} else {
 			orb_publish(ORB_ID(battery_status), _battery_pub, &hil_battery_status);
 		}
+	}
+	
+	/* control state */
+	control_state_s ctrl_state = {};
+	matrix::Quaternion<float> q(hil_state.attitude_quaternion);
+	matrix::Dcm<float> R_to_body(q.inversed());
+	
+	//Time
+	ctrl_state.timestamp = hrt_absolute_time();
+	
+	//Roll Rates:
+	//ctrl_state: body angular rate (rad/s, x forward/y right/z down)
+	//hil_state : body frame angular speed (rad/s)
+	ctrl_state.roll_rate = hil_state.rollspeed;
+	ctrl_state.pitch_rate = hil_state.pitchspeed;
+	ctrl_state.yaw_rate = hil_state.yawspeed;
+
+	// Local Position NED:
+	//ctrl_state: position in local earth frame
+	//hil_state : Latitude/Longitude expressed as * 1E7
+	float x;
+	float y;
+	double lat = hil_state.lat * 1e-7;
+	double lon = hil_state.lon * 1e-7;
+	map_projection_project(&_hil_local_proj_ref, lat, lon, &x, &y);	
+	ctrl_state.x_pos = x;
+	ctrl_state.y_pos = y;
+	ctrl_state.z_pos = hil_state.alt / 1000.0f;
+
+	// Attitude quaternion
+	ctrl_state.q[0] = q(0);
+	ctrl_state.q[1] = q(1);
+	ctrl_state.q[2] = q(2);
+	ctrl_state.q[3] = q(3);
+	
+	// Velocity
+	//ctrl_state: velocity in body frame (x forward/y right/z down)
+	//hil_state : Ground Speed in NED expressed as m/s * 100
+	matrix::Vector3f v_n(hil_state.vx, hil_state.vy, hil_state.vz);
+	matrix::Vector3f v_b = R_to_body * v_n;
+	ctrl_state.x_vel = v_b(0) / 100.0f;
+	ctrl_state.y_vel = v_b(1) / 100.0f;
+	ctrl_state.z_vel = v_b(2) / 100.0f;
+
+	// Acceleration
+	//ctrl_state: acceleration in body frame
+	//hil_state : acceleration in body frame
+	ctrl_state.x_acc = hil_state.xacc;
+	ctrl_state.y_acc = hil_state.yacc;
+	ctrl_state.z_acc = hil_state.zacc;
+
+	static float _acc_hor_filt = 0;
+	_acc_hor_filt = 0.95f * _acc_hor_filt + 0.05f * sqrtf(ctrl_state.x_acc * ctrl_state.x_acc + ctrl_state.y_acc * ctrl_state.y_acc);
+	ctrl_state.horz_acc_mag = _acc_hor_filt;
+	ctrl_state.airspeed_valid = false;
+
+	// publish control state data
+	if (_control_state_pub == nullptr) {
+		_control_state_pub = orb_advertise(ORB_ID(control_state), &ctrl_state);
+
+	} else {
+		orb_publish(ORB_ID(control_state), _control_state_pub, &ctrl_state);
 	}
 }
 
