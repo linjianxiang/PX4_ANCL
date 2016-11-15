@@ -89,6 +89,7 @@
 #include <uORB/topics/vision_position_estimate.h>
 #include <uORB/topics/vtol_vehicle_status.h>
 #include <uORB/topics/wind_estimate.h>
+#include <uORB/topics/mount_status.h>
 #include <uORB/topics/vicon.h>
 #include <uORB/uORB.h>
 
@@ -279,12 +280,12 @@ public:
 		return "HEARTBEAT";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_HEARTBEAT;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -349,12 +350,12 @@ public:
 		return "STATUSTEXT";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_STATUSTEXT;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -494,12 +495,12 @@ public:
 		return "COMMAND_LONG";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_COMMAND_LONG;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -568,12 +569,12 @@ public:
 		return "SYS_STATUS";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_SYS_STATUS;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -682,12 +683,12 @@ public:
 		return "HIGHRES_IMU";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_HIGHRES_IMU;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -801,12 +802,12 @@ public:
 		return "ATTITUDE";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_ATTITUDE;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -870,12 +871,12 @@ public:
 		return "ATTITUDE_QUATERNION";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_ATTITUDE_QUATERNION;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -940,12 +941,12 @@ public:
 		return "VFR_HUD";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_VFR_HUD;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1053,12 +1054,12 @@ public:
 		return "GPS_RAW_INT";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_GPS_RAW_INT;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1123,12 +1124,12 @@ public:
 		return "SYSTEM_TIME";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_SYSTEM_TIME;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1179,12 +1180,12 @@ public:
 		return "TIMESYNC";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_TIMESYNC;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1232,12 +1233,12 @@ public:
 		return "ADSB_VEHICLE";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_ADSB_VEHICLE;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1305,12 +1306,12 @@ public:
 		return "CAMERA_TRIGGER";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_CAMERA_TRIGGER;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1370,12 +1371,12 @@ public:
 		return "GLOBAL_POSITION_INT";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_GLOBAL_POSITION_INT;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1448,12 +1449,12 @@ public:
 		return "VISION_POSITION_NED";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_VISION_POSITION_ESTIMATE;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1517,12 +1518,12 @@ public:
 		return "LOCAL_POSITION_NED";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_LOCAL_POSITION_NED;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1585,12 +1586,12 @@ public:
 		return "LOCAL_POSITION_NED_COV";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_LOCAL_POSITION_NED_COV;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1663,12 +1664,12 @@ public:
 		return "ESTIMATOR_STATUS";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_VIBRATION;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1744,12 +1745,12 @@ public:
 		return "ATT_POS_MOCAP";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_ATT_POS_MOCAP;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1813,12 +1814,12 @@ public:
 		return "HOME_POSITION";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_HOME_POSITION;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1888,12 +1889,12 @@ public:
 		return MavlinkStreamServoOutputRaw<N>::get_name_static();
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_SERVO_OUTPUT_RAW;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -1990,12 +1991,12 @@ public:
 		}
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_ACTUATOR_CONTROL_TARGET;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2077,12 +2078,12 @@ public:
 		return "HIL_CONTROLS";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_HIL_CONTROLS;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2240,12 +2241,12 @@ public:
 		return "HIL_ACTUATOR_CONTROLS";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2398,12 +2399,12 @@ public:
 		return "POSITION_TARGET_GLOBAL_INT";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_POSITION_TARGET_GLOBAL_INT;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2462,12 +2463,12 @@ public:
 		return "POSITION_TARGET_LOCAL_NED";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_POSITION_TARGET_LOCAL_NED;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2535,12 +2536,12 @@ public:
 		return "ATTITUDE_TARGET";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_ATTITUDE_TARGET;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2616,12 +2617,12 @@ public:
 		return "RC_CHANNELS";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_RC_CHANNELS;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2717,12 +2718,12 @@ public:
 		return "MANUAL_CONTROL";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_MANUAL_CONTROL;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2790,12 +2791,12 @@ public:
 		return "OPTICAL_FLOW_RAD";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_OPTICAL_FLOW_RAD;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2863,12 +2864,12 @@ public:
 		return "NAMED_VALUE_FLOAT";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_NAMED_VALUE_FLOAT;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -2928,12 +2929,12 @@ public:
 		return "NAV_CONTROLLER_OUTPUT";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -3001,12 +3002,12 @@ public:
 		return "CAMERA_CAPTURE";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return 0;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -3071,12 +3072,12 @@ public:
 		return "DISTANCE_SENSOR";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_DISTANCE_SENSOR;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -3160,12 +3161,12 @@ public:
 		return "EXTENDED_SYS_STATE";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_EXTENDED_SYS_STATE;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -3255,12 +3256,12 @@ public:
 		return "ALTITUDE";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_ALTITUDE;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -3387,12 +3388,12 @@ public:
 		return "WIND_COV";
 	}
 
-	static uint8_t get_id_static()
+	static uint16_t get_id_static()
 	{
 		return MAVLINK_MSG_ID_WIND_COV;
 	}
 
-	uint8_t get_id()
+	uint16_t get_id()
 	{
 		return get_id_static();
 	}
@@ -3458,74 +3459,62 @@ protected:
 	}
 };
 
-class MavlinkStreamVicon : public MavlinkStream
+(??)
 {
 public:
 	const char *get_name() const
 	{
-		return MavlinkStreamVicon::get_name_static();
+(??)
 	}
 
 	static const char *get_name_static()
 	{
-		return "VICON";
+(??)
 	}
 
-	static uint8_t get_id_static()
+(??)
 	{
-		return MAVLINK_MSG_ID_VICONQ;
+(??)
 	}
 
-	uint8_t get_id()
+(??)
 	{
 		return get_id_static();
 	}
 
 	static MavlinkStream *new_instance(Mavlink *mavlink)
 	{
-		return new MavlinkStreamVicon(mavlink);
+(??)
 	}
 
 	unsigned get_size()
 	{
-		return (_vicon_time > 0) ? MAVLINK_MSG_ID_VICONQ_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES : 0;
+(??)
 	}
 
 private:
-	MavlinkOrbSubscription *_vicon_sub;
-	uint64_t _vicon_time;
-
+(??)
 
 	/* do not allow top copying this class */
-	MavlinkStreamVicon(MavlinkStreamVicon &);
-	MavlinkStreamVicon &operator = (const MavlinkStreamVicon &);
+(??)
 
 protected:
-	explicit MavlinkStreamVicon(Mavlink *mavlink) : MavlinkStream(mavlink),
-		_vicon_sub(_mavlink->add_orb_subscription(ORB_ID(vicon))),
-		_vicon_time(0)
+(??)
 	{}
 
 	void send(const hrt_abstime t)
 	{
-		struct vicon_s vicon = {};
+(??)
 
-		bool updated = _vicon_sub->update(&_vicon_time, &vicon);
+(??)
 
 		if (updated) {
 
-			mavlink_viconq_t msg = {};
+(??)
 
-			msg.usec = (uint32_t)(vicon.t_remote/1000);
+(??)
 
-			for (int i=0;i<3;i++) {
-				msg.p[i] = (int16_t)(vicon.p[i]*1000);
-				msg.v[i] = (int16_t)(vicon.v[i]*1000);
-				msg.q[i] = (int16_t)(vicon.q[i]*20000);
-			}
-			msg.q[3] = (int16_t)(vicon.q[3]*20000);
-
-			mavlink_msg_viconq_send_struct(_mavlink->get_channel(), &msg);
+(??)
 		}
 	}
 };
@@ -3574,6 +3563,6 @@ const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamAltitude::new_instance, &MavlinkStreamAltitude::get_name_static, &MavlinkStreamAltitude::get_id_static),
 	new StreamListItem(&MavlinkStreamADSBVehicle::new_instance, &MavlinkStreamADSBVehicle::get_name_static, &MavlinkStreamADSBVehicle::get_id_static),
 	new StreamListItem(&MavlinkStreamWind::new_instance, &MavlinkStreamWind::get_name_static, &MavlinkStreamWind::get_id_static),
-	new StreamListItem(&MavlinkStreamVicon::new_instance, &MavlinkStreamVicon::get_name_static, &MavlinkStreamVicon::get_id_static),
+(??)
 	nullptr
 };
