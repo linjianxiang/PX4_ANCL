@@ -33,7 +33,6 @@
 px4_add_module(
 	MODULE modules__vicon
 	MAIN vicon
-	STACK 1000
 	SRCS
 		vicon_main.cpp
 	DEPENDS
