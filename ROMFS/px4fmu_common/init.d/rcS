@@ -487,11 +487,6 @@ then
 		fi
 	fi
 
-	# TODO
-	mavlink start -d /dev/ttyS2 -b 115200 -m vicon -r 115200
-	mavlink start -d /dev/ttyS1 -b 230400 -m config -r 230400
-	#mavlink start -d /dev/ttyS2 -b 921600 -m onboard -r 80000 -x
-
 #	if [ $MAVLINK_F == default ]
 #	then
 #		# Normal mode, use baudrate 57600 (default) and data rate 1000 bytes/s
@@ -586,23 +581,23 @@ then
 	#
 	# Starting stuff according to UAVCAN_ENABLE value
 	#
-	if param greater UAVCAN_ENABLE 0
-	then
-		if uavcan start
-		then
-		else
-			tone_alarm $TUNE_ERR
-		fi
-	fi
-
-	if param greater UAVCAN_ENABLE 1
-	then
-		if uavcan start fw
-		then
-		else
-			tone_alarm $TUNE_ERR
-		fi
-	fi
+#	if param greater UAVCAN_ENABLE 0
+#	then
+#		if uavcan start
+#		then
+#		else
+#			tone_alarm $TUNE_ERR
+#		fi
+#	fi
+#
+#	if param greater UAVCAN_ENABLE 1
+#	then
+#		if uavcan start fw
+#		then
+#		else
+#			tone_alarm $TUNE_ERR
+#		fi
+#	fi
 
 	#
 	# Optional drivers
@@ -665,7 +660,11 @@ then
 	fi
 
 	# Start MAVLink
+	# TODO
 	mavlink start -r 800000 -d /dev/ttyACM0 -m config -x
+	mavlink start -d /dev/ttyS2 -b 921600 -m onboard -r 80000 -x
+	mavlink start -d /dev/ttyS1 -b 115200 -m vicon -r 115200
+	#mavlink start -d /dev/ttyS2 -b 230400 -m config -r 230400
 
 	#
 	# Logging
