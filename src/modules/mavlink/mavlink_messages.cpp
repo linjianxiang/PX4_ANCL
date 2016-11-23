@@ -2772,7 +2772,7 @@ protected:
 			msg.buttons |= (manual.loiter_switch << (shift * 3));
 			msg.buttons |= (manual.acro_switch << (shift * 4));
 			msg.buttons |= (manual.offboard_switch << (shift * 5));
-
+			msg.buttons |= (manual.ancl_switch << (shift * 6));
 			mavlink_msg_manual_control_send_struct(_mavlink->get_channel(), &msg);
 		}
 	}
