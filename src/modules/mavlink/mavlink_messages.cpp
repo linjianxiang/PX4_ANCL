@@ -90,9 +90,9 @@
 #include <uORB/topics/vtol_vehicle_status.h>
 #include <uORB/topics/wind_estimate.h>
 #include <uORB/topics/mount_status.h>
-#include <uORB/topics/vicon.h>
+#include <uORB/topics/collision_report.h>
 #include <uORB/uORB.h>
-
+#include <uORB/topics/vicon.h>
 
 static uint16_t cm_uint16_from_m_float(float m);
 static void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_state,
@@ -1293,6 +1293,73 @@ protected:
 	}
 };
 
+class MavlinkStreamCollision : public MavlinkStream
+{
+public:
+	const char *get_name() const
+	{
+		return MavlinkStreamCollision::get_name_static();
+	}
+
+	static const char *get_name_static()
+	{
+		return "COLLISION";
+	}
+
+	static uint16_t get_id_static()
+	{
+		return MAVLINK_MSG_ID_COLLISION;
+	}
+
+	uint16_t get_id()
+	{
+		return get_id_static();
+	}
+
+	static MavlinkStream *new_instance(Mavlink *mavlink)
+	{
+		return new MavlinkStreamCollision(mavlink);
+	}
+
+	unsigned get_size()
+	{
+		return (_collision_time > 0) ? MAVLINK_MSG_ID_COLLISION_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES : 0;
+	}
+
+private:
+	MavlinkOrbSubscription *_collision_sub;
+	uint64_t _collision_time;
+
+	/* do not allow top copying this class */
+	MavlinkStreamCollision(MavlinkStreamCollision &);
+	MavlinkStreamCollision &operator = (const MavlinkStreamCollision &);
+
+protected:
+	explicit MavlinkStreamCollision(Mavlink *mavlink) : MavlinkStream(mavlink),
+		_collision_sub(_mavlink->add_orb_subscription(ORB_ID(collision_report))),
+		_collision_time(0)
+	{}
+
+	void send(const hrt_abstime t)
+	{
+		struct collision_report_s report;
+
+		if (_collision_sub->update(&_collision_time, &report)) {
+			mavlink_collision_t msg = {};
+
+			msg.src = report.src;
+			msg.id = report.id;
+			msg.action = report.action;
+			msg.threat_level = report.threat_level;
+			msg.time_to_minimum_delta = report.time_to_minimum_delta;
+			msg.altitude_minimum_delta = report.altitude_minimum_delta;
+			msg.horizontal_minimum_delta = report.horizontal_minimum_delta;
+
+			mavlink_msg_collision_send_struct(_mavlink->get_channel(), &msg);
+		}
+	}
+};
+
 class MavlinkStreamCameraTrigger : public MavlinkStream
 {
 public:
@@ -1627,7 +1694,7 @@ protected:
 		if (_est_sub->update(&_est_time, &est)) {
 			mavlink_local_position_ned_cov_t msg = {};
 
-			msg.time_boot_ms = est.timestamp / 1000;
+			msg.time_usec = est.timestamp;
 			msg.x = est.states[0];
 			msg.y = est.states[1];
 			msg.z = est.states[2];
@@ -3648,6 +3715,7 @@ const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamExtendedSysState::new_instance, &MavlinkStreamExtendedSysState::get_name_static, &MavlinkStreamExtendedSysState::get_id_static),
 	new StreamListItem(&MavlinkStreamAltitude::new_instance, &MavlinkStreamAltitude::get_name_static, &MavlinkStreamAltitude::get_id_static),
 	new StreamListItem(&MavlinkStreamADSBVehicle::new_instance, &MavlinkStreamADSBVehicle::get_name_static, &MavlinkStreamADSBVehicle::get_id_static),
+	new StreamListItem(&MavlinkStreamCollision::new_instance, &MavlinkStreamCollision::get_name_static, &MavlinkStreamCollision::get_id_static),
 	new StreamListItem(&MavlinkStreamWind::new_instance, &MavlinkStreamWind::get_name_static, &MavlinkStreamWind::get_id_static),
 	new StreamListItem(&MavlinkStreamMountStatus::new_instance, &MavlinkStreamMountStatus::get_name_static, &MavlinkStreamMountStatus::get_id_static),
 	new StreamListItem(&MavlinkStreamVicon::new_instance, &MavlinkStreamVicon::get_name_static, &MavlinkStreamVicon::get_id_static),
