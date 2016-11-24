@@ -1694,7 +1694,7 @@ protected:
 		if (_est_sub->update(&_est_time, &est)) {
 			mavlink_local_position_ned_cov_t msg = {};
 
-			msg.time_usec = est.timestamp;
+			//msg.time_usec = est.timestamp;
 			msg.x = est.states[0];
 			msg.y = est.states[1];
 			msg.z = est.states[2];

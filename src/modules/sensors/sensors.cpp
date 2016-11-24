@@ -4,7 +4,6 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
- * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -312,6 +311,7 @@ private:
 		int rc_map_kill_sw;
 		int rc_map_trans_sw;
 		int rc_map_gear_sw;
+		int rc_map_ancl_sw;
 
 		int rc_map_flaps;
 
@@ -337,6 +337,8 @@ private:
 		float rc_killswitch_th;
 		float rc_trans_th;
 		float rc_gear_th;
+		float rc_ancl_on_th;
+		float rc_ancl_mid_th;
 		bool rc_assist_inv;
 		bool rc_auto_inv;
 		bool rc_rattitude_inv;
@@ -348,6 +350,8 @@ private:
 		bool rc_killswitch_inv;
 		bool rc_trans_inv;
 		bool rc_gear_inv;
+		bool rc_ancl_on_inv;
+		bool rc_ancl_mid_inv;
 
 		float battery_voltage_scaling;
 		float battery_current_scaling;
@@ -388,6 +392,7 @@ private:
 		param_t rc_map_kill_sw;
 		param_t rc_map_trans_sw;
 		param_t rc_map_gear_sw;
+		param_t rc_map_ancl_sw;
 
 		param_t rc_map_flaps;
 
@@ -417,6 +422,8 @@ private:
 		param_t rc_killswitch_th;
 		param_t rc_trans_th;
 		param_t rc_gear_th;
+		param_t rc_ancl_on_th;
+		param_t rc_ancl_mid_th;
 
 		param_t battery_voltage_scaling;
 		param_t battery_current_scaling;
@@ -680,6 +687,7 @@ Sensors::Sensors() :
 	_parameter_handles.rc_map_kill_sw = param_find("RC_MAP_KILL_SW");
 	_parameter_handles.rc_map_trans_sw = param_find("RC_MAP_TRANS_SW");
 	_parameter_handles.rc_map_gear_sw = param_find("RC_MAP_GEAR_SW");
+	_parameter_handles.rc_map_ancl_sw = param_find("RC_MAP_ANCL_SW");
 
 	_parameter_handles.rc_map_aux1 = param_find("RC_MAP_AUX1");
 	_parameter_handles.rc_map_aux2 = param_find("RC_MAP_AUX2");
@@ -710,6 +718,8 @@ Sensors::Sensors() :
 	_parameter_handles.rc_killswitch_th = param_find("RC_KILLSWITCH_TH");
 	_parameter_handles.rc_trans_th = param_find("RC_TRANS_TH");
 	_parameter_handles.rc_gear_th = param_find("RC_GEAR_TH");
+	_parameter_handles.rc_ancl_on_th = param_find("RC_ANCL_ON_TH");
+	_parameter_handles.rc_ancl_mid_th = param_find("RC_ANCL_MID_TH");
 
 
 	/* Differential pressure offset */
@@ -939,6 +949,10 @@ Sensors::parameters_update()
 		PX4_WARN("%s", paramerr);
 	}
 
+	if (param_get(_parameter_handles.rc_map_ancl_sw, &(_parameters.rc_map_ancl_sw)) != OK) {
+		warnx("%s", paramerr);
+	}
+
 	param_get(_parameter_handles.rc_map_aux1, &(_parameters.rc_map_aux1));
 	param_get(_parameter_handles.rc_map_aux2, &(_parameters.rc_map_aux2));
 	param_get(_parameter_handles.rc_map_aux3, &(_parameters.rc_map_aux3));
@@ -986,6 +1000,11 @@ Sensors::parameters_update()
 	_parameters.rc_gear_inv = (_parameters.rc_gear_th < 0);
 	_parameters.rc_gear_th = fabs(_parameters.rc_gear_th);
 
+	_parameters.rc_ancl_on_inv = (_parameters.rc_ancl_on_th<0);
+	_parameters.rc_ancl_on_th = fabs(_parameters.rc_ancl_on_th);
+	_parameters.rc_ancl_mid_inv = (_parameters.rc_ancl_mid_th<0);
+	_parameters.rc_ancl_mid_th = fabs(_parameters.rc_ancl_mid_th);
+
 	/* update RC function mappings */
 	_rc.function[rc_channels_s::RC_CHANNELS_FUNCTION_THROTTLE] = _parameters.rc_map_throttle - 1;
 	_rc.function[rc_channels_s::RC_CHANNELS_FUNCTION_ROLL] = _parameters.rc_map_roll - 1;
@@ -1002,6 +1021,7 @@ Sensors::parameters_update()
 	_rc.function[rc_channels_s::RC_CHANNELS_FUNCTION_KILLSWITCH] = _parameters.rc_map_kill_sw - 1;
 	_rc.function[rc_channels_s::RC_CHANNELS_FUNCTION_TRANSITION] = _parameters.rc_map_trans_sw - 1;
 	_rc.function[rc_channels_s::RC_CHANNELS_FUNCTION_GEAR] = _parameters.rc_map_gear_sw - 1;
+	_rc.function[rc_channels_s::RC_CHANNELS_FUNCTION_ANCL] = _parameters.rc_map_ancl_sw - 1;
 
 	_rc.function[rc_channels_s::RC_CHANNELS_FUNCTION_FLAPS] = _parameters.rc_map_flaps - 1;
 
@@ -2210,6 +2230,7 @@ Sensors::rc_poll()
 						   _parameters.rc_trans_th, _parameters.rc_trans_inv);
 			manual.gear_switch = get_rc_sw2pos_position(rc_channels_s::RC_CHANNELS_FUNCTION_GEAR,
 					     _parameters.rc_gear_th, _parameters.rc_gear_inv);
+manual.ancl_switch = get_rc_sw3pos_position(rc_channels_s::RC_CHANNELS_FUNCTION_ANCL, _parameters.rc_ancl_on_th, _parameters.rc_ancl_on_inv, _parameters.rc_ancl_mid_th, _parameters.rc_ancl_mid_inv);
 
 			/* publish manual_control_setpoint topic */
 			if (_manual_control_pub != nullptr) {
