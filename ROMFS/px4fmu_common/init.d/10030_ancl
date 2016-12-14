@@ -20,13 +20,14 @@ then
 	param set MC_PITCHRATE_I 0.09
 	param set MC_PITCHRATE_D 0.004
 	param set MC_YAW_P 4
+	param set SYS_MC_EST_GROUP 1
+	param set SYS_COMPANION 921600
 fi
 
 set MIXER quad_ancl
-
 set PWM_OUT 1234
-
 set PWM_MIN 1100
 set PWM_MAX 1950
-
 set GPS no
+set USE_AIRSPEED no
+set MAVLINK_F vicon

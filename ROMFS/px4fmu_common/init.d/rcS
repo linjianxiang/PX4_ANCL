@@ -150,6 +150,8 @@ then
 	set MAV_TYPE none
 	set FAILSAFE none
 	set USE_IO yes
+	set GPS yes
+	set USE_AIRSPEED yes
 
 	#
 	# Set USE_IO flag
@@ -342,12 +344,15 @@ then
 		then
 			set FMU_MODE serial
 		fi
-		unset HIL
-	else
-		unset HIL
+	fi
+	unset HIL
+
+	if [ $GPS == yes ]
+	then
 		gps start
 	fi
-
+	unset GPS
+	
 	# waypoint storage
 	# REBOOTWORK this needs to start in parallel
 	if dataman start
@@ -548,11 +553,17 @@ then
 		fi
 	fi
 
-	if [ "x$MAVLINK_F" == xnone ]
+	if [ $MAVLINK_F == vicon ]
 	then
+		mavlink start -d /dev/ttyS1 -b 115200 -m vicon -r 115200
 	else
-		mavlink start $MAVLINK_F
+		if [ "x$MAVLINK_F" == xnone ]
+		then
+		else
+			mavlink start $MAVLINK_F
+		fi
 	fi
+
 	unset MAVLINK_F
 
 	#
