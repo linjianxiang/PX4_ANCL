@@ -89,7 +89,7 @@
 #include <uORB/topics/vision_position_estimate.h>
 #include <uORB/topics/vtol_vehicle_status.h>
 #include <uORB/topics/wind_estimate.h>
-#include <uORB/topics/mount_status.h>
+#include <uORB/topics/mount_orientation.h>
 #include <uORB/topics/collision_report.h>
 #include <uORB/uORB.h>
 #include <uORB/topics/vicon.h>
@@ -1694,7 +1694,7 @@ protected:
 		if (_est_sub->update(&_est_time, &est)) {
 			mavlink_local_position_ned_cov_t msg = {};
 
-			//msg.time_usec = est.timestamp;
+			msg.time_usec = est.timestamp;
 			msg.x = est.states[0];
 			msg.y = est.states[1];
 			msg.z = est.states[2];
@@ -3569,13 +3569,13 @@ private:
 
 protected:
 	explicit MavlinkStreamMountOrientation(Mavlink *mavlink) : MavlinkStream(mavlink),
-		_mount_orientation_sub(_mavlink->add_orb_subscription(ORB_ID(mount_status))),
+		_mount_orientation_sub(_mavlink->add_orb_subscription(ORB_ID(mount_orientation))),
 		_mount_orientation_time(0)
 	{}
 
 	void send(const hrt_abstime t)
 	{
-		struct mount_status_s mount_orientation = {};
+		struct mount_orientation_s mount_orientation = {};
 
 		bool updated = _mount_orientation_sub->update(&_mount_orientation_time, &mount_orientation);
 

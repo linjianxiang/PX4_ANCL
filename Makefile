@@ -224,7 +224,7 @@ check: 	check_px4fmu-v1_default \
 	check_mindpx-v2_default \
 	check_posix_sitl_default \
 	check_tap-v1_default \
-	check_asc-v1_default \
+	check_aerofc-v1_default \
 	check_px4-stm32f4discovery_default \
 	check_crazyflie_default \
 	check_tests \
@@ -261,9 +261,10 @@ tests: check_unittest run_tests_posix
 qgc_firmware: \
 	check_px4fmu-v1_default \
 	check_px4fmu-v2_default \
+	check_px4fmu-v3_default \
+	check_px4fmu-v4_default_and_uavcan \
 	check_mindpx-v2_default \
 	check_tap-v1_default \
-	check_px4fmu-v4_default_and_uavcan \
 	check_format
 
 package_firmware:
