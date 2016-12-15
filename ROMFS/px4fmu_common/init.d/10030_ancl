@@ -22,6 +22,15 @@ then
 	param set MC_YAW_P 4
 	param set SYS_MC_EST_GROUP 1
 	param set SYS_COMPANION 921600
+	param set ATT_EXT_HDG_M 2
+	param set LPE_GPS_ON 0
+	param set LPE_VIS_ON 0
+	param set LPE_LAT 53.527
+	param set LPE_LON -113.530
+	param set LPE_VCN_P 0.01
+	param set LPE_VCN_V 0.1
+	param set LPE_VCN_ON 1
+
 fi
 
 set MIXER quad_ancl
