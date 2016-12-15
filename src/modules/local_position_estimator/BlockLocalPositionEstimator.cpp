@@ -16,7 +16,6 @@ static const uint32_t 		EST_STDDEV_XY_VALID = 2.0; // 2.0 m
 static const uint32_t 		EST_STDDEV_Z_VALID = 2.0; // 2.0 m
 static const uint32_t 		EST_STDDEV_TZ_VALID = 2.0; // 2.0 m
 static const bool integrate = true; // use accel for integrating
-
 static const float P_MAX = 1.0e6f; // max allowed value in state covariance
 static const float LAND_RATE = 10.0f; // rate of land detector correction
 
@@ -44,11 +43,11 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_sub_dist0(ORB_ID(distance_sensor), 1000 / 10, 0, &getSubscriptions()),
 	_sub_dist1(ORB_ID(distance_sensor), 1000 / 10, 1, &getSubscriptions()),
 	_sub_dist2(ORB_ID(distance_sensor), 1000 / 10, 2, &getSubscriptions()),
-	_sub_dist3(ORB_ID(distance_sensor), 1000 / 10, 3, &getSubscriptions()),
+	_sub_dist3(ORB_ID(distance_sensor), 1000 / 50, 3, &getSubscriptions()),
 	_dist_subs(),
 	_sub_lidar(NULL),
 	_sub_sonar(NULL),
-
+	_sub_vicon(ORB_ID(vicon),1000 / 100, 0, &getSubscriptions()),
 	// publications
 	_pub_lpos(ORB_ID(vehicle_local_position), -1, &getPublications()),
 	_pub_gpos(ORB_ID(vehicle_global_position), -1, &getPublications()),
@@ -82,6 +81,9 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_vision_delay(this, "VIS_DELAY"),
 	_vision_on(this, "VIS_ON"),
 	_mocap_p_stddev(this, "VIC_P"),
+	_vicon_on(this,"VCN_ON"),
+	_vicon_p_stddev(this,"VCN_P"),
+	_vicon_v_stddev(this,"VCN_V"),
 	_flow_gyro_comp(this, "FLW_GYRO_CMP"),
 	_flow_z_offset(this, "FLW_OFF_Z"),
 	_flow_scale(this, "FLW_SCALE"),
@@ -111,6 +113,7 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_visionStats(this, ""),
 	_mocapStats(this, ""),
 	_gpsStats(this, ""),
+	_viconStats(this, ""),
 
 	// low pass
 	_xLowPass(this, "X_LP"),
@@ -137,6 +140,7 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_time_last_vision_p(0),
 	_time_last_mocap(0),
 	_time_last_land(0),
+	_time_last_vicon(0),
 
 	// initialization flags
 	_receivedGps(false),
@@ -148,6 +152,7 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_visionInitialized(false),
 	_mocapInitialized(false),
 	_landInitialized(false),
+	_viconInitialized(false),
 
 	// reference altitudes
 	_altOrigin(0),
@@ -173,6 +178,7 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_visionFault(FAULT_NONE),
 	_mocapFault(FAULT_NONE),
 	_landFault(FAULT_NONE),
+	_viconFault(FAULT_NONE),
 
 	// loop performance
 	_loop_perf(),
@@ -204,10 +210,8 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	initSS();
 
 	// perf counters
-	_loop_perf = perf_alloc(PC_ELAPSED,
-				"local_position_estimator_runtime");
-	//_interval_perf = perf_alloc(PC_INTERVAL,
-	//"local_position_estimator_interval");
+	_loop_perf = perf_alloc(PC_ELAPSED,"local_position_estimator_runtime");
+	_interval_perf = perf_alloc(PC_INTERVAL,"local_position_estimator_interval");
 	_err_perf = perf_alloc(PC_COUNT, "local_position_estimator_err");
 
 	// map
@@ -290,12 +294,13 @@ void BlockLocalPositionEstimator::update()
 	bool gpsUpdated = _gps_on.get() && _sub_gps.updated();
 	bool visionUpdated = _vision_on.get() && _sub_vision_pos.updated();
 	bool mocapUpdated = _sub_mocap.updated();
+	bool viconUpdated = _vicon_on.get() && _sub_vicon.updated();
 	bool lidarUpdated = (_sub_lidar != NULL) && _sub_lidar->updated();
 	bool sonarUpdated = (_sub_sonar != NULL) && _sub_sonar->updated();
 	bool landUpdated = (
 				   (_sub_land.get().landed ||
 				    ((!_sub_armed.get().armed) && (!_sub_land.get().freefall)))
-				   && (!(_lidarInitialized || _mocapInitialized || _visionInitialized || _sonarInitialized))
+				   && (!(_lidarInitialized || _mocapInitialized || _visionInitialized || _sonarInitialized || _viconInitialized))
 				   && ((_timeStamp - _time_last_land) > 1.0e6f / LAND_RATE));
 
 	// get new data
@@ -322,7 +327,7 @@ void BlockLocalPositionEstimator::update()
 
 	} else {
 		if (vxy_stddev_ok) {
-			if (_flowInitialized || _gpsInitialized || _visionInitialized || _mocapInitialized) {
+			if (_flowInitialized || _gpsInitialized || _visionInitialized || _mocapInitialized || _viconInitialized) {
 				_validXY = true;
 			}
 		}
@@ -484,7 +489,7 @@ void BlockLocalPositionEstimator::update()
 		} else {
 			perf_begin(_loop_perf);// TODO
 			flowCorrect();
-			//perf_count(_interval_perf);
+			//
 			perf_end(_loop_perf);
 		}
 	}
@@ -504,6 +509,15 @@ void BlockLocalPositionEstimator::update()
 
 		} else {
 			mocapCorrect();
+		}
+	}
+
+	if (viconUpdated) {
+		perf_count(_interval_perf);
+		if (!_viconInitialized) {
+			viconInit();
+		} else {
+			viconCorrect();
 		}
 	}
 
@@ -538,6 +552,7 @@ void BlockLocalPositionEstimator::update()
 		_xDelay.update(_x);
 		_time_last_hist = _timeStamp;
 	}
+
 }
 
 void BlockLocalPositionEstimator::checkTimeouts()
@@ -582,6 +597,7 @@ void BlockLocalPositionEstimator::checkTimeouts()
 	flowCheckTimeout();
 	visionCheckTimeout();
 	mocapCheckTimeout();
+	viconCheckTimeout();
 }
 
 float BlockLocalPositionEstimator::agl()
@@ -774,7 +790,8 @@ void BlockLocalPositionEstimator::publishEstimatorStatus()
 		+ ((_flowFault > FAULT_NONE) << SENSOR_FLOW)
 		+ ((_sonarFault > FAULT_NONE) << SENSOR_SONAR)
 		+ ((_visionFault > FAULT_NONE) << SENSOR_VISION)
-		+ ((_mocapFault > FAULT_NONE) << SENSOR_MOCAP);
+		+ ((_mocapFault > FAULT_NONE) << SENSOR_MOCAP)
+		+ ((_viconFault > FAULT_NONE) << SENSOR_VICON);
 	_pub_est_status.get().timeout_flags =
 		(_baroInitialized << SENSOR_BARO)
 		+ (_gpsInitialized << SENSOR_GPS)
@@ -782,7 +799,8 @@ void BlockLocalPositionEstimator::publishEstimatorStatus()
 		+ (_lidarInitialized << SENSOR_LIDAR)
 		+ (_sonarInitialized << SENSOR_SONAR)
 		+ (_visionInitialized << SENSOR_VISION)
-		+ (_mocapInitialized << SENSOR_MOCAP);
+		+ (_mocapInitialized << SENSOR_MOCAP)
+		+ (_viconInitialized << SENSOR_VICON);
 	_pub_est_status.get().pos_horiz_accuracy = _pub_gpos.get().eph;
 	_pub_est_status.get().pos_vert_accuracy = _pub_gpos.get().epv;
 

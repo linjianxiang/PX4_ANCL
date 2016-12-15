@@ -47,6 +47,7 @@ px4_add_module(
 		sensors/vision.cpp
 		sensors/mocap.cpp
 		sensors/land.cpp
+		sensors/vicon.cpp
 	DEPENDS
 		platforms__common
 	)

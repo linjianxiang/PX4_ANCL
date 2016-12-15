@@ -23,6 +23,7 @@
 #include <uORB/topics/vehicle_gps_position.h>
 #include <uORB/topics/vision_position_estimate.h>
 #include <uORB/topics/att_pos_mocap.h>
+#include <uORB/topics/vicon.h>
 
 // uORB Publications
 #include <uORB/Publication.hpp>
@@ -55,6 +56,7 @@ enum sensor_t {
 	SENSOR_VISION,
 	SENSOR_MOCAP,
 	SENSOR_LAND,
+	SENSOR_VICON,
 };
 
 // change this to set when
@@ -137,6 +139,7 @@ public:
 	enum {Y_mocap_x = 0, Y_mocap_y, Y_mocap_z, n_y_mocap};
 	enum {Y_land_vx, Y_land_vy, Y_land_agl = 0, n_y_land};
 	enum {POLL_FLOW, POLL_SENSORS, POLL_PARAM, n_poll};
+	enum {Y_vicon_x = 0, Y_vicon_y, Y_vicon_z, Y_vicon_vx, Y_vicon_vy, Y_vicon_vz, n_y_vicon};
 
 	BlockLocalPositionEstimator();
 	void update();
@@ -204,6 +207,12 @@ private:
 	void mocapInit();
 	void mocapCheckTimeout();
 
+	// vicon
+	int viconMeasure(Vector<float, n_y_vicon> &y);
+	void viconCorrect();
+	void viconInit();
+	void viconCheckTimeout();
+
 	// land
 	int  landMeasure(Vector<float, n_y_land> &y);
 	void landCorrect();
@@ -246,6 +255,7 @@ private:
 	uORB::Subscription<distance_sensor_s> *_dist_subs[N_DIST_SUBS];
 	uORB::Subscription<distance_sensor_s> *_sub_lidar;
 	uORB::Subscription<distance_sensor_s> *_sub_sonar;
+	uORB::Subscription<vicon_s> _sub_vicon;
 
 	// publications
 	uORB::Publication<vehicle_local_position_s> _pub_lpos;
@@ -295,6 +305,11 @@ private:
 	// mocap parameters
 	BlockParamFloat  _mocap_p_stddev;
 
+	// vicon parameters
+	BlockParamInt _vicon_on;
+	BlockParamFloat _vicon_p_stddev;
+	BlockParamFloat _vicon_v_stddev;
+
 	// flow parameters
 	BlockParamInt  _flow_gyro_comp;
 	BlockParamFloat  _flow_z_offset;
@@ -329,6 +344,7 @@ private:
 	BlockStats<float, n_y_vision> _visionStats;
 	BlockStats<float, n_y_mocap> _mocapStats;
 	BlockStats<double, n_y_gps> _gpsStats;
+	BlockStats<float, n_y_vicon> _viconStats;
 	uint16_t _landCount;
 
 	// low pass
@@ -355,6 +371,7 @@ private:
 	uint64_t _time_last_vision_p;
 	uint64_t _time_last_mocap;
 	uint64_t _time_last_land;
+	uint64_t _time_last_vicon;
 
 	// initialization flags
 	bool _receivedGps;
@@ -366,6 +383,7 @@ private:
 	bool _visionInitialized;
 	bool _mocapInitialized;
 	bool _landInitialized;
+	bool _viconInitialized;
 
 	// reference altitudes
 	float _altOrigin;
@@ -391,6 +409,7 @@ private:
 	fault_t _visionFault;
 	fault_t _mocapFault;
 	fault_t _landFault;
+	fault_t _viconFault;
 
 	// performance counters
 	perf_counter_t _loop_perf;
