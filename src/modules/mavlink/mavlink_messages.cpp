@@ -235,6 +235,18 @@ void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_st
 		custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_OFFBOARD;
 		break;
 
+	case vehicle_status_s::NAVIGATION_STATE_ANCL1:
+		*mavlink_base_mode |=0;
+		custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_ANCL;
+		custom_mode.sub_mode = PX4_CUSTOM_SUB_MODE_ANCL1;
+		break;
+
+	case vehicle_status_s::NAVIGATION_STATE_ANCL2:
+		*mavlink_base_mode |=0;
+		custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_ANCL;
+		custom_mode.sub_mode = PX4_CUSTOM_SUB_MODE_ANCL2;
+		break;
+
 	case vehicle_status_s::NAVIGATION_STATE_MAX:
 		/* this is an unused case, ignore */
 		break;
