@@ -282,7 +282,7 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_VICONQ:
 		handle_message_vicon(msg);
 		break;
-        case MAVLINK_MSG_IMG_MOMENTS:
+        case MAVLINK_MSG_ID_IMG_MOMENTS:
                 handle_message_img_moments(msg);
                 break;
 	default:
