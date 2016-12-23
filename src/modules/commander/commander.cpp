@@ -588,10 +588,10 @@ void print_status()
 	warnx("home: x = %.7f, y = %.7f, z = %.2f ", (double)_home.x, (double)_home.y, (double)_home.z);
 	warnx("datalink: %s", (status.data_link_lost) ? "LOST" : "OK");
 
-#ifdef __PX4_POSIX
+//#ifdef __PX4_POSIX
 	warnx("main state: %d", internal_state.main_state);
 	warnx("nav state: %d", status.nav_state);
-#endif
+//#endif
 
 	/* read all relevant states */
 	int state_sub = orb_subscribe(ORB_ID(vehicle_status));
@@ -806,7 +806,22 @@ bool handle_command(struct vehicle_status_s *status_local, const struct safety_s
 				} else if (custom_main_mode == PX4_CUSTOM_MAIN_MODE_OFFBOARD) {
 					/* OFFBOARD */
 					main_ret = main_state_transition(status_local, commander_state_s::MAIN_STATE_OFFBOARD, main_state_prev, &status_flags, &internal_state);
+				} else if (custom_main_mode == PX4_CUSTOM_MAIN_MODE_ANCL) {
+					/* ANCL */
+					switch(custom_sub_mode) {
+					case PX4_CUSTOM_SUB_MODE_ANCL1:
+						main_ret = main_state_transition(status_local, commander_state_s::MAIN_STATE_ANCL1, main_state_prev,&status_flags, &internal_state);
+						break;
+					case PX4_CUSTOM_SUB_MODE_ANCL2:
+						main_ret = main_state_transition(status_local, commander_state_s::MAIN_STATE_ANCL2, main_state_prev,&status_flags, &internal_state);
+						break;
+					default:
+						main_ret = TRANSITION_DENIED;
+						mavlink_log_critical(&mavlink_log_pub, "Unsupported ANCL mode");
+						break;
+					}
 				}
+			
 
 			} else {
 				/* use base mode */
@@ -2712,6 +2727,7 @@ int commander_thread_main(int argc, char *argv[])
 				 *  - system not in manual mode
 				 */
 				tune_negative(true);
+
 			}
 
 			/* evaluate the main state machine according to mode switches */
@@ -3262,7 +3278,8 @@ set_main_state_rc(struct vehicle_status_s *status_local)
 		 (_last_sp_man.rattitude_switch == sp_man.rattitude_switch) &&
 		 (_last_sp_man.posctl_switch == sp_man.posctl_switch) &&
 		 (_last_sp_man.loiter_switch == sp_man.loiter_switch) &&
-		 (_last_sp_man.mode_slot == sp_man.mode_slot))) {
+		 (_last_sp_man.mode_slot == sp_man.mode_slot) &&
+		 (_last_sp_man.ancl_switch == sp_man.ancl_switch))) {
 
 		// update these fields for the geofence system
 
@@ -3313,6 +3330,8 @@ set_main_state_rc(struct vehicle_status_s *status_local)
 
 		/* if we get here mode was rejected, continue to evaluate the main system mode */
 	}
+
+
 
 	/* we know something has changed - check if we are in mode slot operation */
 	if (sp_man.mode_slot != manual_control_setpoint_s::MODE_SLOT_NONE) {
@@ -3447,11 +3466,34 @@ set_main_state_rc(struct vehicle_status_s *status_local)
 						break;
 					}
 				}
+
+				if (new_mode == commander_state_s::MAIN_STATE_ANCL1) {
+					/* fall back to position control */
+					new_mode = commander_state_s::MAIN_STATE_POSCTL;
+					print_reject_mode(status_local, "ANCL1");
+					res = main_state_transition(status_local, new_mode, main_state_prev, &status_flags, &internal_state);
+
+					if (res != TRANSITION_DENIED) {
+						break;
+					}
+				}
+
+				if (new_mode == commander_state_s::MAIN_STATE_ANCL2) {
+					/* fall back to position control */
+					new_mode = commander_state_s::MAIN_STATE_POSCTL;
+					print_reject_mode(status_local, "ANCL2");
+					res = main_state_transition(status_local, new_mode, main_state_prev, &status_flags, &internal_state);
+
+					if (res != TRANSITION_DENIED) {
+						break;
+					}
+				}
 			}
 		}
 
 		return res;
 	}
+
 
 	/* offboard and RTL switches off or denied, check main mode switch */
 	switch (sp_man.mode_switch) {
@@ -3520,18 +3562,25 @@ set_main_state_rc(struct vehicle_status_s *status_local)
 	case manual_control_setpoint_s::SWITCH_POS_ON:			// AUTO
 		//ANCL -- Geoff
 		if (sp_man.ancl_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
-			res = main_state_transition(status_local, commander_state_s::MAIN_STATE_POSCTL, main_state_prev, &status_flags, &internal_state);
+			res = main_state_transition(status_local, commander_state_s::MAIN_STATE_ANCL2, main_state_prev, &status_flags, &internal_state);
 			if (res != TRANSITION_DENIED) {
 				break; // changed successfully or already in this state
 			}
-			print_reject_mode(status_local, "AUTO ANCL PAUSE");
-		} else { //MIDDLE or OFF
-			res = main_state_transition(status_local,commander_state_s::MAIN_STATE_AUTO_ANCL, main_state_prev, &status_flags, &internal_state);
+			print_reject_mode(status_local, "ANCL1");
+		} else if (sp_man.ancl_switch == manual_control_setpoint_s::SWITCH_POS_MIDDLE) {
+			res = main_state_transition(status_local,commander_state_s::MAIN_STATE_ANCL1, main_state_prev, &status_flags, &internal_state);
 			if (res != TRANSITION_DENIED) {
 				break; // changed successfully or already in this state
 			}
-			print_reject_mode(status_local, "AUTO ANCL");
+			print_reject_mode(status_local, "ANCL2");
+		} else {// OFF
+			res = main_state_transition(status_local,commander_state_s::MAIN_STATE_POSCTL, main_state_prev, &status_flags, &internal_state);
+			if (res != TRANSITION_DENIED) {
+				break; // changed successfully or already in this state
+			}
+			print_reject_mode(status_local, "POSITION CONTROL");
 		}
+
 		/*if (sp_man.loiter_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
 			res = main_state_transition(status_local, commander_state_s::MAIN_STATE_AUTO_LOITER, main_state_prev, &status_flags, &internal_state);
 
@@ -3799,17 +3848,18 @@ set_control_mode()
 			!offboard_control_mode.ignore_position) && !control_mode.flag_control_acceleration_enabled;
 
 		break;
-	case vehicle_status_s::NAVIGATION_STATE_AUTO_ANCL:
+	case vehicle_status_s::NAVIGATION_STATE_ANCL1:
+	case vehicle_status_s::NAVIGATION_STATE_ANCL2:
 		control_mode.flag_control_manual_enabled = false;
 		control_mode.flag_control_auto_enabled = false;
-		control_mode.flag_control_rates_enabled = false;
-		control_mode.flag_control_attitude_enabled = false;
+		control_mode.flag_control_rates_enabled = true;
+		control_mode.flag_control_attitude_enabled = true;
 		control_mode.flag_control_rattitude_enabled = false;
-		control_mode.flag_control_position_enabled = false;
-		control_mode.flag_control_velocity_enabled = false;
+		control_mode.flag_control_position_enabled = true;
+		control_mode.flag_control_velocity_enabled = true;
 		control_mode.flag_control_acceleration_enabled = false;
-		control_mode.flag_control_altitude_enabled = false;
-		control_mode.flag_control_climb_rate_enabled = false;
+		control_mode.flag_control_altitude_enabled = true;
+		control_mode.flag_control_climb_rate_enabled = true;
 		control_mode.flag_control_termination_enabled = false;
 		control_mode.flag_control_ancl_enabled = true;
 		break;

@@ -248,7 +248,8 @@ private:
 	bool _reset_alt_sp;
 	bool _do_reset_alt_pos_flag;
 	bool _mode_auto;
-	bool _mode_ancl;
+	bool _mode_ancl1;
+	bool _mode_ancl2;
 	bool _pos_hold_engaged;
 	bool _alt_hold_engaged;
 	bool _run_pos_control;
@@ -413,7 +414,8 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_reset_alt_sp(true),
 	_do_reset_alt_pos_flag(true),
 	_mode_auto(false),
-	_mode_ancl(false),
+	_mode_ancl1(false),
+	_mode_ancl2(false),
 	_pos_hold_engaged(false),
 	_alt_hold_engaged(false),
 	_run_pos_control(true),
@@ -1317,38 +1319,39 @@ void MulticopterPositionControl::control_ancl(float dt) {
 	const static float r = 0.5f;
 	const static float omega = 0.5f;
 
-	if (!_mode_ancl) {
-		_mode_ancl = true;
-		t_circle=0;
-	}
-
-	if (_manual.ancl_switch == manual_control_setpoint_s::SWITCH_POS_MIDDLE) {
+	if (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_ANCL1) {
+		if (!_mode_ancl1) {
+			_mode_ancl1 = true;
+			_mode_ancl2 = false;
+			t_circle=0;
+		}
 		_pos_sp(0) = 0;
 		_pos_sp(1) = 0;
 		_pos_sp(2) = -1.0f;
 		_run_pos_control = true;
 		_run_alt_control = true;
-	} else if (_manual.ancl_switch == manual_control_setpoint_s::SWITCH_POS_OFF) {
+	} else if (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_ANCL2) {
+		if (!_mode_ancl1) {
+			_mode_ancl2 = true;
+			_mode_ancl1 = false;
+			t_circle=0;
+		}
 		_pos_sp(0) = r*((float)cos(t_circle*omega)-1.0f);
 		_pos_sp(1) = r*(float)sin(t_circle*omega);
 		_pos_sp(2) = -1.0f;
 		_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0) - r*omega*(float)sin(t_circle*omega);
 		_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1) + r*omega*(float)cos(t_circle*omega);
-		//_vel_sp(2)=0;
 		_run_pos_control = false;
 		_run_alt_control = true;
 		t_circle+=dt;
-		warnx("%3.3f:(%.3f,%.3f)",(double)t_circle,(double)_pos_sp(0),(double)_pos_sp(1));
-	} else 	if (_manual.ancl_switch == manual_control_setpoint_s::SWITCH_POS_ON) {
-		//Should not be possible stay where we are
-		_reset_pos_sp = true;
-		_reset_alt_sp = true;
 	} else {
 		//Should not be possible staty where we are
 		_reset_pos_sp = true;
 		_reset_alt_sp = true;
+		warnx("PROBLEM!");
 	}
 
+	warnx("%3.3f:(%1.3f,%1.3f,%1.3f)",(double)t_circle,(double)_pos_sp(0),(double)_pos_sp(1),(double)_pos_sp(2));
 
 }
 
@@ -1525,21 +1528,28 @@ MulticopterPositionControl::task_main()
 			if (_control_mode.flag_control_manual_enabled) {
 				/* manual control */
 				control_manual(dt);
-				_mode_ancl = false;
+				_mode_ancl1 = false;
+				_mode_ancl2 = false;
+				//warnx("Manual control");
 
 			} else if (_control_mode.flag_control_offboard_enabled) {
 				/* offboard control */
 				control_offboard(dt);
 				_mode_auto = false;
-				_mode_ancl = false;
+				_mode_ancl1 = false;
+				_mode_ancl2 =false;
+				//warnx("Offboard control");
 			} else if (_control_mode.flag_control_ancl_enabled) {
 				control_ancl(dt);
 				_mode_auto = false;
+				//warnx("ANCL Auto control");
 
 			} else {
 				/* AUTO */
 				control_auto(dt);
-				_mode_ancl = false;
+				_mode_ancl1 = false;
+				_mode_ancl2 = false;
+				//warnx("PX4 AUTO control");
 			}
 
 			/* weather-vane mode for vtol: disable yaw control */
@@ -1581,7 +1591,8 @@ MulticopterPositionControl::task_main()
 				_reset_alt_sp = true;
 				_do_reset_alt_pos_flag = true;
 				_mode_auto = false;
-				_mode_ancl = false;
+				_mode_ancl1 = false;
+				_mode_ancl2 = false;
 				reset_int_z = true;
 				reset_int_xy = true;
 
@@ -2136,7 +2147,8 @@ MulticopterPositionControl::task_main()
 			_reset_pos_sp = true;
 			_do_reset_alt_pos_flag = true;
 			_mode_auto = false;
-			_mode_ancl = false;
+			_mode_ancl1 = false;
+			_mode_ancl2 = false;
 			reset_int_z = true;
 			reset_int_xy = true;
 			control_vel_enabled_prev = false;

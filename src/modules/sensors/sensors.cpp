@@ -1001,6 +1001,8 @@ Sensors::parameters_update()
 	_parameters.rc_gear_inv = (_parameters.rc_gear_th < 0);
 	_parameters.rc_gear_th = fabs(_parameters.rc_gear_th);
 
+	param_get(_parameter_handles.rc_ancl_on_th,&(_parameters.rc_ancl_on_th));
+	param_get(_parameter_handles.rc_ancl_mid_th,&(_parameters.rc_ancl_mid_th));
 	_parameters.rc_ancl_on_inv = (_parameters.rc_ancl_on_th<0);
 	_parameters.rc_ancl_on_th = fabs(_parameters.rc_ancl_on_th);
 	_parameters.rc_ancl_mid_inv = (_parameters.rc_ancl_mid_th<0);
