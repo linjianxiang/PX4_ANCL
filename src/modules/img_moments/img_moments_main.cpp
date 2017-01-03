@@ -78,20 +78,16 @@ int img_moments_main(int argc, char *argv[])
 
         if (!strcmp(argv[1], "status")) {
                 sub = orb_subscribe(ORB_ID(img_moments));
-                for(int i=0;i<10;i++){
-                    if (sub>0) {
-                            PX4_INFO("Image moments:");
-                            orb_copy(ORB_ID(img_moments), sub, &data);
-                            PX4_INFO("Timestamp: (%d)",data.usec);
-                            PX4_INFO("s1 of Objects: (%.2f)",(double)data.s[0]);
-                            PX4_INFO("s2 of Objects: (%.2f)",(double)data.s[1]);
-                            PX4_INFO("s3 of Objects: (%.2f)",(double)data.s[2]);
-                            PX4_INFO("s4 of Objects: (%.2f)",(double)data.s[3]);
-                    } else {
-                            PX4_INFO("Could not subscribe to img_moments topic");
-                    }
-
-                    usleep(500000);
+                if (sub>0) {
+                        PX4_INFO("Image moments:");
+                        orb_copy(ORB_ID(img_moments), sub, &data);
+                        PX4_INFO("Timestamp: (%d)",data.usec);
+                        PX4_INFO("s1 of Objects: (%.2f)",(double)data.s[0]);
+                        PX4_INFO("s2 of Objects: (%.2f)",(double)data.s[1]);
+                        PX4_INFO("s3 of Objects: (%.2f)",(double)data.s[2]);
+                        PX4_INFO("s4 of Objects: (%.2f)",(double)data.s[3]);
+                } else {
+                        PX4_INFO("Could not subscribe to img_moments topic");
                 }
                 sub = orb_unsubscribe(sub);
                 return 0;
