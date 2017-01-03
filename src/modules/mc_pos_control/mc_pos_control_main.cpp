@@ -76,6 +76,7 @@
 #include <uORB/topics/vehicle_global_velocity_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/vehicle_land_detected.h>
+#include <uORB/topics/vehicle_image_attitude_setpoint.h>
 
 #include <systemlib/systemlib.h>
 #include <systemlib/mavlink_log.h>
@@ -139,6 +140,7 @@ private:
 	int		_pos_sp_triplet_sub;		/**< position setpoint triplet */
 	int		_local_pos_sp_sub;		/**< offboard local position setpoint */
 	int		_global_vel_sp_sub;		/**< offboard global velocity setpoint */
+	int		_image_att_sp_sub;
 
 	orb_advert_t	_att_sp_pub;			/**< attitude setpoint publication */
 	orb_advert_t	_local_pos_sp_pub;		/**< vehicle local position setpoint publication */
@@ -157,6 +159,7 @@ private:
 	struct position_setpoint_triplet_s		_pos_sp_triplet;	/**< vehicle global position setpoint triplet */
 	struct vehicle_local_position_setpoint_s	_local_pos_sp;		/**< vehicle local position setpoint */
 	struct vehicle_global_velocity_setpoint_s	_global_vel_sp;		/**< vehicle global velocity setpoint */
+	struct vehicle_image_attitude_setpoint_s	_image_att_sp;
 
 	control::BlockParamFloat _manual_thr_min;
 	control::BlockParamFloat _manual_thr_max;
@@ -201,6 +204,8 @@ private:
 		param_t alt_mode;
 		param_t opt_recover;
 		param_t mg;
+		param_t use_vision;
+		param_t mix_vision;
 
 	}		_params_handles;		/**< handles for interesting parameters */
 
@@ -229,6 +234,12 @@ private:
 
 		int opt_recover;
 		float mg;
+		bool use_vision;
+		bool mix_vision_roll;
+		bool mix_vision_pitch;
+		bool mix_vision_yaw;
+		bool mix_vision_thrust;
+		//uint8_t mix_vision;
 
 		math::Vector<3> pos_p;
 		math::Vector<3> vel_p;
@@ -254,6 +265,8 @@ private:
 	bool _alt_hold_engaged;
 	bool _run_pos_control;
 	bool _run_alt_control;
+	
+	bool _image_att_sp_valid;
 
 	math::Vector<3> _pos;
 	math::Vector<3> _pos_sp;
@@ -385,6 +398,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_local_pos_sub(-1),
 	_pos_sp_triplet_sub(-1),
 	_global_vel_sp_sub(-1),
+	_image_att_sp_sub(-1),
 
 	/* publications */
 	_att_sp_pub(nullptr),
@@ -420,6 +434,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_alt_hold_engaged(false),
 	_run_pos_control(true),
 	_run_alt_control(true),
+	_image_att_sp_valid(false),
 	_yaw(0.0f),
 	_in_landing(false),
 	_lnd_reached_ground(false),
@@ -447,6 +462,12 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_params.vel_cruise.zero();
 	_params.vel_ff.zero();
 	_params.sp_offs_max.zero();
+	_params.use_vision=false;
+	_params.mix_vision_roll=false;
+	_params.mix_vision_pitch=false;
+	_params.mix_vision_yaw=false;
+	_params.mix_vision_thrust=false;
+	//_params.mix_vision=0;
 
 	_pos.zero();
 	_pos_sp.zero();
@@ -471,6 +492,8 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_params_handles.z_vel_max_up	= param_find("MPC_Z_VEL_MAX_UP");
 	_params_handles.z_vel_max_down	= param_find("MPC_Z_VEL_MAX");
 	_params_handles.mg		= param_find("MPC_MG");
+	_params_handles.use_vision	= param_find("MPC_VIS_ON");
+	_params_handles.mix_vision	= param_find("MPC_MIX_VIS");
 
 	// transitional support: Copy param values from max to down
 	// param so that max param can be renamed in 1-2 releases
@@ -560,6 +583,20 @@ MulticopterPositionControl::parameters_update(bool force)
 		param_get(_params_handles.tilt_max_land, &_params.tilt_max_land);
 		_params.tilt_max_land = math::radians(_params.tilt_max_land);
 
+		int i;
+		param_get(_params_handles.use_vision, &i);
+		if (i>0)
+			_params.use_vision=true;
+		else
+			_params.use_vision=false;
+
+		param_get(_params_handles.mix_vision, &i);
+		_params.mix_vision_roll=(i&1)==1;
+		_params.mix_vision_pitch=(i&2)==2;
+		_params.mix_vision_yaw=(i&4)==4;
+		_params.mix_vision_thrust=(i&8)==8;
+
+
 		float v;
 		uint32_t v_i;
 		param_get(_params_handles.xy_p, &v);
@@ -620,7 +657,7 @@ MulticopterPositionControl::parameters_update(bool force)
 		param_get(_params_handles.alt_mode, &v_i);
 		_params.alt_mode = v_i;
 
-		int i;
+		
 		param_get(_params_handles.opt_recover, &i);
 		_params.opt_recover = i;
 
@@ -765,6 +802,14 @@ MulticopterPositionControl::poll_subscriptions()
 		_xy_reset_counter = _local_pos.xy_reset_counter;
 		_vz_reset_counter = _local_pos.vz_reset_counter;
 		_vxy_reset_counter = _local_pos.vxy_reset_counter;
+	}
+
+	orb_check(_image_att_sp_sub,&updated);
+	
+	if (updated) {
+		orb_copy(ORB_ID(vehicle_image_attitude_setpoint), _image_att_sp_sub, &_image_att_sp);
+		_image_att_sp_valid = _image_att_sp.valid;
+
 	}
 }
 
@@ -1351,7 +1396,7 @@ void MulticopterPositionControl::control_ancl(float dt) {
 		warnx("PROBLEM!");
 	}
 
-	warnx("%3.3f:(%1.3f,%1.3f,%1.3f)",(double)t_circle,(double)_pos_sp(0),(double)_pos_sp(1),(double)_pos_sp(2));
+	//warnx("%3.3f:(%1.3f,%1.3f,%1.3f)",(double)t_circle,(double)_pos_sp(0),(double)_pos_sp(1),(double)_pos_sp(2));
 
 }
 
@@ -1560,6 +1605,7 @@ MulticopterPositionControl::task_main()
 				/* reset in case of setpoint updates */
 				_att_sp.disable_mc_yaw_control = false;
 			}
+
 
 			if (!_control_mode.flag_control_manual_enabled && _pos_sp_triplet.current.valid
 			    && _pos_sp_triplet.current.type == position_setpoint_s::SETPOINT_TYPE_IDLE) {
@@ -2274,6 +2320,16 @@ MulticopterPositionControl::task_main()
 		      !(_control_mode.flag_control_position_enabled ||
 			_control_mode.flag_control_velocity_enabled ||
 			_control_mode.flag_control_acceleration_enabled))) {
+
+
+			//TODO
+			if (_image_att_sp_valid && _mode_ancl2 && _params.use_vision ) {
+				if (_params.mix_vision_roll) _att_sp.roll_body = _image_att_sp.roll;
+				if (_params.mix_vision_pitch) _att_sp.pitch_body = _image_att_sp.pitch;
+				if (_params.mix_vision_yaw) _att_sp.yaw_body = _image_att_sp.yaw;
+				if (_params.mix_vision_thrust) _att_sp.thrust = _image_att_sp.thrust;
+			}
+
 
 			if (_att_sp_pub != nullptr) {
 				orb_publish(_attitude_setpoint_id, _att_sp_pub, &_att_sp);

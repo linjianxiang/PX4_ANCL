@@ -113,6 +113,7 @@ set(msg_file_names
 	vehicle_global_position.msg
 	vehicle_global_velocity_setpoint.msg
 	vehicle_gps_position.msg
+	vehicle_image_attitude_setpoint.msg
 	vehicle_land_detected.msg
 	vehicle_local_position.msg
 	vehicle_local_position_setpoint.msg

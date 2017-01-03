@@ -479,5 +479,25 @@ PARAM_DEFINE_INT32(MPC_ALT_MODE, 0);
  */
 PARAM_DEFINE_FLOAT(MPC_MG, 0.35f);
 
+/**
+ * Use Vision
+ *
+ * @unit 
+ * @min 0
+ * @max 1
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_INT32(MPC_VIS_ON, 0);
+
+/**
+ * Vision Mixer (roll=1,pitch=2,yaw=4,thrust=8)
+ *
+ * @unit 
+ * @min 0
+ * @max 19
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_INT32(MPC_MIX_VIS, 0);
+
 
 
