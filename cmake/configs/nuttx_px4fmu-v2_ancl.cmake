@@ -69,6 +69,7 @@ set(config_module_list
 	#systemcmds/topic_listener
 	systemcmds/ver
 	modules/vicon
+	modules/img_moments
 
 	#
 	# Testing

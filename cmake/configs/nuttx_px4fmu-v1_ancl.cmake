@@ -58,7 +58,7 @@ set(config_module_list
 	systemcmds/dumpfile
 	systemcmds/ver
 	modules/vicon
-    modules/img_moments
+    	modules/img_moments
 
 	#
 	# General system control
