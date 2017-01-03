@@ -282,7 +282,9 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_VICONQ:
 		handle_message_vicon(msg);
 		break;
-
+        case MAVLINK_MSG_ID_IMG_MOMENTS:
+                handle_message_img_moments(msg);
+                break;
 	default:
 		break;
 	}
@@ -2011,6 +2013,29 @@ void MavlinkReceiver::handle_message_vicon(mavlink_message_t *msg)
 	} else {
 		orb_publish(ORB_ID(vicon),_vicon_pub,&v);
 	}
+}
+
+void MavlinkReceiver::handle_message_img_moments(mavlink_message_t *msg)
+{
+        mavlink_img_moments_t img_moments;
+        mavlink_msg_img_moments_decode(msg,&img_moments);
+
+        if (msg->sysid!=_mavlink->get_system_id()) return;
+
+        struct img_moments_s img_moments_data;
+        memset(&img_moments_data,0,sizeof(img_moments_data));
+
+        img_moments_data.usec=((uint32_t)img_moments.usec)*1000;
+        img_moments_data.s[0]=(float)img_moments.s[0];
+        img_moments_data.s[1]=(float)img_moments.s[1];
+        img_moments_data.s[2]=(float)img_moments.s[2];
+        img_moments_data.s[3]=(float)img_moments.s[3];
+
+        if (_img_moments_pub == nullptr) {
+                _img_moments_pub = orb_advertise(ORB_ID(img_moments),&img_moments_data);
+        } else {
+                orb_publish(ORB_ID(img_moments),_img_moments_pub,&img_moments_data);
+        }
 }
 
 void

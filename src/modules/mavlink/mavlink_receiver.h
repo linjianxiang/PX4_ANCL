@@ -79,6 +79,7 @@
 #include <uORB/topics/gps_inject_data.h>
 #include <uORB/topics/control_state.h>
 #include <uORB/topics/vicon.h>
+#include <uORB/topics/img_moments.h>
 #include <uORB/topics/collision_report.h>
 
 
@@ -151,6 +152,7 @@ private:
 	void handle_message_serial_control(mavlink_message_t *msg);
 	void handle_message_logging_ack(mavlink_message_t *msg);
 	void handle_message_vicon(mavlink_message_t *msg);
+    void handle_message_img_moments(mavlink_message_t *msg);
 
 	void *receive_thread(void *arg);
 
@@ -233,6 +235,7 @@ private:
 	orb_advert_t _gps_inject_data_pub;
 	orb_advert_t _command_ack_pub;
 	orb_advert_t _vicon_pub;
+    orb_advert_t _img_moments_pub;
 	int _control_mode_sub;
 	int _hil_frames;
 	uint64_t _old_timestamp;

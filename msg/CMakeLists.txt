@@ -125,6 +125,7 @@ set(msg_file_names
 	mount_orientation.msg
 	collision_report.msg
 	vicon.msg
+	img_moments.msg
 	)
 
 # Get absolute paths
