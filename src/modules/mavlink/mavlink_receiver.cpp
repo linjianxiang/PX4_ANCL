@@ -133,6 +133,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_gps_inject_data_pub(nullptr),
 	_command_ack_pub(nullptr),
 	_vicon_pub(nullptr),
+        _img_moments_pub(nullptr),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
 	_hil_frames(0),
 	_old_timestamp(0),
