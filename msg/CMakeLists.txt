@@ -127,6 +127,8 @@ set(msg_file_names
 	collision_report.msg
 	vicon.msg
 	img_moments.msg
+	img_point.msg
+	img_line.msg
 	)
 
 # Get absolute paths
