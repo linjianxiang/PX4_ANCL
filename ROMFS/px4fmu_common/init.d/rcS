@@ -651,16 +651,14 @@ then
 	fi
 
 	# lightware serial lidar sensor
-	if param compare SENS_EN_SF0X 0
+	if param compare SENS_EN_SF0X 1
 	then
-	else
 		sf0x start
 	fi
 
 	# lightware i2c lidar sensor
-	if param compare SENS_EN_SF1XX 0
+	if param compare SENS_EN_SF1XX 1
 	then
-	else
 		sf1xx start
 	fi
 
