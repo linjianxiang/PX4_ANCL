@@ -94,6 +94,9 @@
 #include <uORB/uORB.h>
 #include <uORB/topics/vicon.h>
 #include <uORB/topics/img_moments.h>
+#include <uORB/topics/img_point.h>
+#include <uORB/topics/img_line.h>
+#include <uORB/topics/vehicle_image_attitude_setpoint.h>
 
 static uint16_t cm_uint16_from_m_float(float m);
 static void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_state,
@@ -3751,6 +3754,207 @@ protected:
         }
 };
 
+class MavlinkStreamImgPoint : public MavlinkStream
+{
+public:
+        const char *get_name() const
+        {
+                return MavlinkStreamImgPoint::get_name_static();
+        }
+
+        static const char *get_name_static()
+        {
+                return "IMG_POINT";
+        }
+
+        static uint16_t get_id_static()
+        {
+                return MAVLINK_MSG_ID_IMG_POINT;
+        }
+
+        uint16_t get_id()
+        {
+                return get_id_static();
+        }
+
+        static MavlinkStream *new_instance(Mavlink *mavlink)
+        {
+                return new MavlinkStreamImgPoint(mavlink);
+        }
+
+        unsigned get_size()
+        {
+                return MAVLINK_MSG_ID_IMG_POINT_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+        }
+
+private:
+        MavlinkOrbSubscription *_img_point_sub;
+        mavlink_img_point_t _msg;
+
+        /* do not allow top copying this class */
+        MavlinkStreamImgPoint(MavlinkStreamImgPoint &);
+        MavlinkStreamImgPoint &operator = (const MavlinkStreamImgPoint &);
+
+protected:
+        explicit MavlinkStreamImgPoint(Mavlink *mavlink) : MavlinkStream(mavlink),
+                _img_point_sub(_mavlink->add_orb_subscription(ORB_ID(img_point))),
+                _msg{}
+        {
+
+        }
+
+        void send(const hrt_abstime t)
+        {
+                struct img_point_s img_point;
+
+                bool updated = _img_point_sub->update(&img_point);
+
+                if (updated) {
+                        mavlink_img_point_t msg;
+                        msg.usec = (uint32_t)(img_point.usec);
+                        msg.y[0] = (float)(img_point.y[0]);
+                        msg.y[1] = (float)(img_point.y[1]);
+                        msg.id = (float)(img_point.id);
+                        mavlink_msg_img_point_send_struct(_mavlink->get_channel(), &msg);
+                }
+        }
+};
+
+class MavlinkStreamImgLine : public MavlinkStream
+{
+public:
+        const char *get_name() const
+        {
+                return MavlinkStreamImgLine::get_name_static();
+        }
+
+        static const char *get_name_static()
+        {
+                return "IMG_LINE";
+        }
+
+        static uint16_t get_id_static()
+        {
+                return MAVLINK_MSG_ID_IMG_LINE;
+        }
+
+        uint16_t get_id()
+        {
+                return get_id_static();
+        }
+
+        static MavlinkStream *new_instance(Mavlink *mavlink)
+        {
+                return new MavlinkStreamImgLine(mavlink);
+        }
+
+        unsigned get_size()
+        {
+                return MAVLINK_MSG_ID_IMG_LINE_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+        }
+
+private:
+        MavlinkOrbSubscription *_img_line_sub;
+        mavlink_img_line_t _msg;
+
+        /* do not allow top copying this class */
+        MavlinkStreamImgLine(MavlinkStreamImgLine &);
+        MavlinkStreamImgLine &operator = (const MavlinkStreamImgLine &);
+
+protected:
+        explicit MavlinkStreamImgLine(Mavlink *mavlink) : MavlinkStream(mavlink),
+                _img_line_sub(_mavlink->add_orb_subscription(ORB_ID(img_line))),
+                _msg{}
+        {
+
+        }
+
+        void send(const hrt_abstime t)
+        {
+                struct img_line_s img_line;
+
+                bool updated = _img_line_sub->update(&img_line);
+
+                if (updated) {
+                        mavlink_img_line_t msg;
+                        msg.usec = (uint32_t)(img_line.usec);
+                        msg.y[0] = (float)(img_line.y[0]);
+                        msg.y[1] = (float)(img_line.y[1]);
+                        msg.id = (float)(img_line.id);
+                        mavlink_msg_img_line_send_struct(_mavlink->get_channel(), &msg);
+                }
+        }
+};
+
+class MavlinkStreamImageAttitudeTarget : public MavlinkStream
+{
+public:
+	const char *get_name() const
+	{
+		return MavlinkStreamImageAttitudeTarget::get_name_static();
+	}
+
+	static const char *get_name_static()
+	{
+		return "IMAGE_ATTITUDE_TARGET";
+	}
+
+	static uint16_t get_id_static()
+	{
+		//TODO
+		return MAVLINK_MSG_ID_ATTITUDE_TARGET;
+	}
+
+	uint16_t get_id()
+	{
+		return get_id_static();
+	}
+
+	static MavlinkStream *new_instance(Mavlink *mavlink)
+	{
+		return new MavlinkStreamImageAttitudeTarget(mavlink);
+	}
+
+	unsigned get_size()
+	{
+		//TODO
+		return MAVLINK_MSG_ID_ATTITUDE_TARGET_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+	}
+
+private:
+	MavlinkOrbSubscription *_att_sp_sub;
+	uint64_t _att_sp_time;
+
+	/* do not allow top copying this class */
+	MavlinkStreamImageAttitudeTarget(MavlinkStreamImageAttitudeTarget &);
+	MavlinkStreamImageAttitudeTarget &operator = (const MavlinkStreamImageAttitudeTarget &);
+
+protected:
+	explicit MavlinkStreamImageAttitudeTarget(Mavlink *mavlink) : MavlinkStream(mavlink),
+		_att_sp_sub(_mavlink->add_orb_subscription(ORB_ID(vehicle_image_attitude_setpoint))),
+		_att_sp_time(0)
+	{}
+
+	void send(const hrt_abstime t)
+	{
+		struct vehicle_image_attitude_setpoint_s att_sp;
+
+		if (_att_sp_sub->update(&_att_sp_time, &att_sp)) {
+
+			mavlink_attitude_target_t msg{};
+
+			msg.time_boot_ms = att_sp.timestamp / 1000;
+			//TODO
+			mavlink_euler_to_quaternion(att_sp.roll, att_sp.pitch, att_sp.yaw, msg.q);
+
+			msg.thrust = att_sp.thrust;
+
+			mavlink_msg_attitude_target_send_struct(_mavlink->get_channel(), &msg);
+		}
+	}
+};
+
+
 const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamHeartbeat::new_instance, &MavlinkStreamHeartbeat::get_name_static, &MavlinkStreamHeartbeat::get_id_static),
 	new StreamListItem(&MavlinkStreamStatustext::new_instance, &MavlinkStreamStatustext::get_name_static, &MavlinkStreamStatustext::get_id_static),
@@ -3799,5 +4003,8 @@ const StreamListItem *streams_list[] = {
 	new StreamListItem(&MavlinkStreamMountOrientation::new_instance, &MavlinkStreamMountOrientation::get_name_static, &MavlinkStreamMountOrientation::get_id_static),
 	new StreamListItem(&MavlinkStreamVicon::new_instance, &MavlinkStreamVicon::get_name_static, &MavlinkStreamVicon::get_id_static),
         new StreamListItem(&MavlinkStreamImgMoments::new_instance,&MavlinkStreamImgMoments::get_name_static,&MavlinkStreamImgMoments::get_id_static),
+	new StreamListItem(&MavlinkStreamImgPoint::new_instance,&MavlinkStreamImgPoint::get_name_static,&MavlinkStreamImgPoint::get_id_static),
+	new StreamListItem(&MavlinkStreamImgLine::new_instance,&MavlinkStreamImgLine::get_name_static,&MavlinkStreamImgLine::get_id_static),
+	new StreamListItem(&MavlinkStreamImageAttitudeTarget::new_instance,&MavlinkStreamImageAttitudeTarget::get_name_static,&MavlinkStreamImageAttitudeTarget::get_id_static),
 	nullptr
 };
