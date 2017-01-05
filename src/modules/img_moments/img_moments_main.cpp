@@ -53,9 +53,10 @@
 #include <functional>
 #include <drivers/drv_hrt.h>
 #include <arch/board/board.h>
-
+#include <errno.h>
 #include <uORB/topics/img_moments.h>
-
+#include <math.h>
+#include <systemlib/scheduling_priorities.h>
 
 /**
  *
@@ -63,6 +64,99 @@
  * @ingroup apps
  */
 extern "C" __EXPORT int img_moments_main(int argc, char *argv[]);
+
+class FakeImgMoments {
+public:
+	FakeImgMoments();
+	~FakeImgMoments();
+	int start();
+private:
+	struct img_moments_s img_moments;
+	orb_advert_t pub;
+	int task;
+	static void task_main_trampoline(int argc, char *argv[]);
+	void task_main();
+	bool task_should_exit;
+};
+
+namespace fake_img_moments {
+	FakeImgMoments *fake;
+}
+
+FakeImgMoments::FakeImgMoments() : pub(nullptr), task(-1), task_should_exit(false) {
+	memset(&img_moments,0,sizeof(img_moments));
+}
+
+FakeImgMoments::~FakeImgMoments() {
+
+	if (task != -1) {
+		task_should_exit = true;
+
+		unsigned i =0;
+
+		do {
+			usleep(20000);
+			if (++i>50) {
+				px4_task_delete(task);
+				break;
+			}
+		} while (task != -1);
+	}
+
+	fake_img_moments::fake = nullptr;
+
+	if (!pub)
+		orb_unadvertise(pub);
+}
+
+int
+FakeImgMoments::start() {
+	ASSERT(task == -1);
+	task = px4_task_spawn_cmd("fake_img_moments",
+				SCHED_DEFAULT,
+				SCHED_PRIORITY_SLOW_DRIVER-1,
+				1296,
+				(px4_main_t)&FakeImgMoments::task_main_trampoline,
+				nullptr);
+	if (task < 0) {
+		warnx("Task start failed");
+		return -errno;
+	}
+
+	return OK;
+}
+
+void
+FakeImgMoments::task_main_trampoline(int argc, char *argv[]) {
+	fake_img_moments::fake->task_main();
+}
+
+void
+FakeImgMoments::task_main() {
+
+	while (!task_should_exit) {
+		usleep(10000);
+		
+		img_moments.timestamp = hrt_absolute_time();
+
+		img_moments.s[0]=sin(img_moments.timestamp);
+		img_moments.s[1]=cos(img_moments.timestamp);;
+		img_moments.s[2]=1+sin(img_moments.timestamp);;
+		img_moments.s[3]=sin(img_moments.timestamp);;
+		
+		img_moments.usec = img_moments.timestamp-1000;
+
+		if (pub == nullptr) {
+			pub = orb_advertise(ORB_ID(img_moments),&img_moments);
+		} else {
+			orb_publish(ORB_ID(img_moments),pub,&img_moments);
+		}
+
+	}
+
+	task = -1;
+}
+	
 
 
 int img_moments_main(int argc, char *argv[])
@@ -72,7 +166,7 @@ int img_moments_main(int argc, char *argv[])
         memset(&data,0,sizeof(data));
 
         if (argc < 2) {
-                warnx("usage: img_moments {status}");
+                warnx("usage: img_moments {status|fake}");
                 return 1;
         }
 
@@ -80,6 +174,8 @@ int img_moments_main(int argc, char *argv[])
                 sub = orb_subscribe(ORB_ID(img_moments));
                 if (sub>0) {
                         PX4_INFO("Image moments:");
+			if (fake_img_moments::fake !=nullptr)
+			PX4_INFO("FAKE DATA!!!");
                         orb_copy(ORB_ID(img_moments), sub, &data);
                         PX4_INFO("Timestamp: (%d)",data.usec);
                         PX4_INFO("s1 of Objects: (%.2f)",(double)data.s[0]);
@@ -92,6 +188,43 @@ int img_moments_main(int argc, char *argv[])
                 sub = orb_unsubscribe(sub);
                 return 0;
         }
+
+	if (!strcmp(argv[1], "fake")) {
+
+		if (!strcmp(argv[2], "start")) {
+			if (fake_img_moments::fake != nullptr) {
+				warnx("already running");
+				return 1;
+			}
+
+			fake_img_moments::fake = new FakeImgMoments;
+
+			if (OK != fake_img_moments::fake->start()) {
+				delete fake_img_moments::fake;
+				fake_img_moments::fake = nullptr;
+				warnx("start failed");
+				return 1;
+			}
+
+			return 0;
+		}
+
+		if (!strcmp(argv[2], "stop")) {
+			if (fake_img_moments::fake == nullptr) {
+				warnx("not running");
+				return 1;
+			}
+			delete fake_img_moments::fake;
+			fake_img_moments::fake = nullptr;
+			return 0;
+		}
+
+	}
+
+
+
+
+	
         warnx("unrecognized command");
         return 1;
 }

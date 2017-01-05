@@ -33,7 +33,7 @@
 px4_add_module(
 	MODULE modules__img_moments
 	MAIN img_moments
-	STACK 1000
+	STACK_MAIN 1000
 	SRCS
 		img_moments_main.cpp
 	DEPENDS
