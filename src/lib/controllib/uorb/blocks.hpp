@@ -43,11 +43,16 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_global_position.h>
+#include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/parameter_update.h>
+#include <uORB/topics/img_moments.h>
+#include <uORB/topics/img_point.h>
+#include <uORB/topics/img_line.h>
+#include <uORB/topics/vehicle_image_attitude_setpoint.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,6 +108,28 @@ protected:
 public:
 	BlockUorbEnabledAutopilot(SuperBlock *parent, const char *name);
 	virtual ~BlockUorbEnabledAutopilot();
+};
+
+/**
+ * ANCL IBVS Outer Loop with uORB
+ */
+
+class __EXPORT BlockIBVSOuterLoop : public SuperBlock
+{
+protected:
+	//subscriptions
+	//uORB::Subscription<vehicle_attitude_s> _att;
+	uORB::Subscription<img_moments_s> _img_moments;
+	uORB::Subscription<img_point_s> _img_point;
+	uORB::Subscription<img_line_s> _img_line;
+	uORB::Subscription<vehicle_status_s> _status;
+	uORB::Subscription<parameter_update_s> _param_update;
+	uORB::Subscription<vehicle_local_position_s> _pos;
+	//publications
+	uORB::Publication<vehicle_image_attitude_setpoint_s> _att_sp;
+public:
+	BlockIBVSOuterLoop(SuperBlock *parent, const char *name);
+	virtual ~BlockIBVSOuterLoop();
 };
 
 } // namespace control

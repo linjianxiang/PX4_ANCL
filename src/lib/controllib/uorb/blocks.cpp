@@ -99,5 +99,21 @@ BlockUorbEnabledAutopilot::BlockUorbEnabledAutopilot(SuperBlock *parent, const c
 
 BlockUorbEnabledAutopilot::~BlockUorbEnabledAutopilot() {};
 
+BlockIBVSOuterLoop::BlockIBVSOuterLoop(SuperBlock *parent, const char *name):SuperBlock(parent,name),
+	// subscriptions
+	//_att(ORB_ID(vehicle_attitude),20,0,&getSubscriptions()),
+	_img_moments(ORB_ID(img_moments),20,0,&getSubscriptions()),
+	_img_point(ORB_ID(img_point),20,0,&getSubscriptions()),
+	_img_line(ORB_ID(img_line),20,0,&getSubscriptions()),
+	_status(ORB_ID(vehicle_status), 20, 0, &getSubscriptions()),
+	_param_update(ORB_ID(parameter_update), 1000, 0, &getSubscriptions()), // limit to 1 Hz
+	_pos(ORB_ID(vehicle_local_position), 20, 0, &getSubscriptions()),
+	//publications
+	_att_sp(ORB_ID(vehicle_image_attitude_setpoint),-1,&getPublications())
+{}
+
+BlockIBVSOuterLoop::~BlockIBVSOuterLoop() {};
+
+
 } // namespace control
 
