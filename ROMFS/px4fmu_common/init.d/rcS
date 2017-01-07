@@ -595,6 +595,10 @@ then
 		then
 			mavlink start -d $MAVLINK_COMPANION_DEVICE -b 57600 -m osd -r 1000
 		fi
+		if param compare SYS_COMPANION 230400
+		then
+			mavlink start -d $MAVLINK_COMPANION_DEVICE -b 230400 -m config -r 20000 -x
+		fi
 		if param compare SYS_COMPANION 257600
 		then
 			mavlink start -d $MAVLINK_COMPANION_DEVICE -b 57600 -m magic -r 5000 -x
@@ -701,12 +705,11 @@ then
 		px4flow start &
 	fi
 
-	# Start MAVLink
-	# TODO
-	mavlink start -r 800000 -d /dev/ttyACM0 -m config -x
-	#mavlink start -d /dev/ttyS2 -b 921600 -m onboard -r 80000 -x
-	#mavlink start -d /dev/ttyS1 -b 115200 -m vicon -r 115200
-	#mavlink start -d /dev/ttyS2 -b 230400 -m config -r 230400
+	# Start MAVLink on the gimbal port
+	#mavlink start -r 1200 -d /dev/ttyS1
+
+	# Start MAVLink on USB, developers can use the MAVLink shell
+	mavlink start -r 60000 -d /dev/ttyACM0 -m config
 
 	#
 	# Logging
