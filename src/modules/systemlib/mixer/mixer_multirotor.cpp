@@ -154,6 +154,9 @@ MultirotorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t cb_handl
 	if (!strcmp(geomname, "4+")) {
 		geometry = MultirotorGeometry::QUAD_PLUS;
 
+	} else if (!strcmp(geomname, "4a")) {
+		geometry = MultirotorGeometry::QUAD_ANCL;
+
 	} else if (!strcmp(geomname, "4x")) {
 		geometry = MultirotorGeometry::QUAD_X;
 
