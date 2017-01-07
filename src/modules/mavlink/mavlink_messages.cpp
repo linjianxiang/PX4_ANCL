@@ -247,6 +247,7 @@ void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_st
 
 	case vehicle_status_s::NAVIGATION_STATE_ANCL2:
 		*mavlink_base_mode |=MAV_MODE_FLAG_MANUAL_INPUT_ENABLED | MAV_MODE_FLAG_STABILIZE_ENABLED | MAV_MODE_FLAG_GUIDED_ENABLED | MAV_MODE_FLAG_AUTO_ENABLED | MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+		custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_ANCL;
 		custom_mode.sub_mode = PX4_CUSTOM_SUB_MODE_ANCL2;
 		break;
 
@@ -348,7 +349,7 @@ protected:
 		get_mavlink_mode_state(&status, &system_status, &base_mode, &custom_mode);
 
 		mavlink_msg_heartbeat_send(_mavlink->get_channel(), _mavlink->get_system_type(), MAV_AUTOPILOT_PX4,
-					   base_mode, custom_mode, system_status);
+					   base_mode, custom_mode, system_status);	
 	}
 };
 

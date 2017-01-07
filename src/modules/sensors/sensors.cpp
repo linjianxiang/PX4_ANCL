@@ -2235,7 +2235,6 @@ Sensors::rc_poll()
 			manual.gear_switch = get_rc_sw2pos_position(rc_channels_s::RC_CHANNELS_FUNCTION_GEAR,
 					     _parameters.rc_gear_th, _parameters.rc_gear_inv);
 manual.ancl_switch = get_rc_sw3pos_position(rc_channels_s::RC_CHANNELS_FUNCTION_ANCL, _parameters.rc_ancl_on_th, _parameters.rc_ancl_on_inv, _parameters.rc_ancl_mid_th, _parameters.rc_ancl_mid_inv);
-
 			/* publish manual_control_setpoint topic */
 			if (_manual_control_pub != nullptr) {
 				orb_publish(ORB_ID(manual_control_setpoint), _manual_control_pub, &manual);
