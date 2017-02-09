@@ -206,6 +206,8 @@ private:
 		param_t mg;
 		param_t use_vision;
 		param_t mix_vision;
+		param_t circle_r;
+		param_t circle_w;
 
 	}		_params_handles;		/**< handles for interesting parameters */
 
@@ -240,6 +242,8 @@ private:
 		bool mix_vision_yaw;
 		bool mix_vision_thrust;
 		//uint8_t mix_vision;
+		float circle_r;
+		float circle_w;
 
 		math::Vector<3> pos_p;
 		math::Vector<3> vel_p;
@@ -494,6 +498,8 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_params_handles.mg		= param_find("MPC_MG");
 	_params_handles.use_vision	= param_find("MPC_VIS_ON");
 	_params_handles.mix_vision	= param_find("MPC_MIX_VIS");
+	_params_handles.circle_r	= param_find("MPC_CIR_R");
+	_params_handles.circle_w	= param_find("MPC_CIR_W");
 
 	// transitional support: Copy param values from max to down
 	// param so that max param can be renamed in 1-2 releases
@@ -683,6 +689,12 @@ MulticopterPositionControl::parameters_update(bool force)
 
 		param_get(_params_handles.mg, &v);
 		_params.mg = v;
+
+		param_get(_params_handles.circle_r, &v);
+		_params.circle_r = v;
+
+		param_get(_params_handles.circle_w, &v);
+		_params.circle_w = v;
 	}
 
 	return OK;
@@ -1361,9 +1373,6 @@ void MulticopterPositionControl::control_auto(float dt)
 
 void MulticopterPositionControl::control_ancl(float dt) {
 	
-	const static float r = 0.5f;
-	const static float omega = 0.5f;
-
 	if (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_ANCL1) {
 		if (!_mode_ancl1) {
 			_mode_ancl1 = true;
@@ -1376,21 +1385,21 @@ void MulticopterPositionControl::control_ancl(float dt) {
 		_run_pos_control = true;
 		_run_alt_control = true;
 	} else if (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_ANCL2) {
-		if (!_mode_ancl1) {
+		if (!_mode_ancl2) {
 			_mode_ancl2 = true;
 			_mode_ancl1 = false;
 			t_circle=0;
 		}
-		_pos_sp(0) = r*((float)cos(t_circle*omega)-1.0f);
-		_pos_sp(1) = r*(float)sin(t_circle*omega);
+		_pos_sp(0) = _params.circle_r*((float)cos(t_circle*_params.circle_w)-1.0f);
+		_pos_sp(1) = _params.circle_r*(float)sin(t_circle*_params.circle_w);
 		_pos_sp(2) = -1.0f;
-		_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0) - r*omega*(float)sin(t_circle*omega);
-		_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1) + r*omega*(float)cos(t_circle*omega);
+		_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0) - _params.circle_r*_params.circle_w*(float)sin(t_circle*_params.circle_w);
+		_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1) + _params.circle_r*_params.circle_w*(float)cos(t_circle*_params.circle_w);
 		_run_pos_control = false;
 		_run_alt_control = true;
 		t_circle+=dt;
 	} else {
-		//Should not be possible staty where we are
+		//Should not be possible stay where we are
 		_reset_pos_sp = true;
 		_reset_alt_sp = true;
 		warnx("PROBLEM!");

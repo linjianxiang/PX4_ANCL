@@ -499,5 +499,23 @@ PARAM_DEFINE_INT32(MPC_VIS_ON, 0);
  */
 PARAM_DEFINE_INT32(MPC_MIX_VIS, 0);
 
+/**
+ * ANCL Circle trajectory radius
+ * @unit m
+ * @min 0
+ * @max 1
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_CIR_R,0.0f);
+
+/**
+ * ANCL Circle trajectory omega
+ * @unit rad/s
+ * @min 0
+ * @max 0.5
+ * @group Multicopter Position Control
+ */
+PARAM_DEFINE_FLOAT(MPC_CIR_W,0.0f);
+
 
 
