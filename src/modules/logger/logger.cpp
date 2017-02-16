@@ -521,9 +521,9 @@ void Logger::add_default_topics()
 	add_topic("telemetry_status");
 	add_topic("vehicle_command");
 	add_topic("vehicle_status");
-	add_topic("vtol_vehicle_status", 100);
+	//add_topic("vtol_vehicle_status", 100);
 	add_topic("commander_state", 100);
-	add_topic("satellite_info");
+	//add_topic("satellite_info");
 	add_topic("vehicle_attitude_setpoint", 20);
 	add_topic("vehicle_rates_setpoint", 10);
 	add_topic("actuator_controls", 20);
@@ -538,29 +538,34 @@ void Logger::add_default_topics()
 	add_topic("position_setpoint_triplet", 10);
 	add_topic("att_pos_mocap", 50);
 	add_topic("vision_position_estimate", 50);
-	add_topic("optical_flow", 50);
+	//add_topic("optical_flow", 50);
 	add_topic("rc_channels");
 	add_topic("input_rc");
-	add_topic("airspeed", 50);
+	//add_topic("airspeed", 50);
 	add_topic("differential_pressure", 50);
-	add_topic("distance_sensor", 20);
+	//add_topic("distance_sensor", 20);
 	add_topic("esc_status", 20);
 	add_topic("estimator_status", 50); //this one is large
-	add_topic("ekf2_innovations", 20);
-	add_topic("tecs_status", 20);
-	add_topic("wind_estimate", 100);
+	//add_topic("ekf2_innovations", 20);
+	//add_topic("tecs_status", 20);
+	//add_topic("wind_estimate", 100);
 	add_topic("control_state", 20);
 	add_topic("camera_trigger");
 	add_topic("cpuload");
-	add_topic("gps_dump"); //this will only be published if GPS_DUMP_COMM is set
+	//add_topic("gps_dump"); //this will only be published if GPS_DUMP_COMM is set
 	add_topic("sensor_preflight");
 
 	/* for estimator replay (need to be at full rate) */
 	add_topic("sensor_combined");
-	add_topic("vehicle_gps_position");
+	//add_topic("vehicle_gps_position");
 	add_topic("vehicle_land_detected");
 
+	//ancl
 	add_topic("vicon");
+	add_topic("vehicle_image_attitude_setpoint");
+	add_topic("img_line");
+	add_topic("img_moments");
+	add_topic("img_point");
 }
 
 int Logger::add_topics_from_file(const char *fname)
