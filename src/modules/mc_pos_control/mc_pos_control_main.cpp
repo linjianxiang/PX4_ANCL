@@ -1371,6 +1371,8 @@ void MulticopterPositionControl::control_auto(float dt)
 	}
 }
 
+#define T0 2.0f
+
 void MulticopterPositionControl::control_ancl(float dt) {
 	
 	if (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_ANCL1) {
@@ -1390,14 +1392,25 @@ void MulticopterPositionControl::control_ancl(float dt) {
 			_mode_ancl1 = false;
 			t_circle=0;
 		}
-		_pos_sp(0) = _params.circle_r*((float)cos(t_circle*_params.circle_w)-1.0f);
-		_pos_sp(1) = _params.circle_r*(float)sin(t_circle*_params.circle_w);
-		_pos_sp(2) = -1.0f;
-		_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0) - _params.circle_r*_params.circle_w*(float)sin(t_circle*_params.circle_w);
-		_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1) + _params.circle_r*_params.circle_w*(float)cos(t_circle*_params.circle_w);
-		_run_pos_control = false;
+
+		if (t_circle<T0) { //Straight line to circle
+			_pos_sp(0) = _params.circle_r*t_circle/T0;
+			_pos_sp(1) = 0.0;
+			_pos_sp(2) = -1.0f;
+			_run_pos_control = true;
+		} else { //Do circle trajectory
+			_pos_sp(0) = _params.circle_r*(float)cos((t_circle-T0)*_params.circle_w);
+			_pos_sp(1) = _params.circle_r*(float)sin((t_circle-T0)*_params.circle_w);
+			_pos_sp(2) = -1.0f;
+			_vel_sp(0) = (_pos_sp(0) - _pos(0)) * _params.pos_p(0) - _params.circle_r*_params.circle_w*(float)sin((t_circle-T0)*_params.circle_w);
+			_vel_sp(1) = (_pos_sp(1) - _pos(1)) * _params.pos_p(1) + _params.circle_r*_params.circle_w*(float)cos((t_circle-T0)*_params.circle_w);
+			_run_pos_control = false;
+		}
+
 		_run_alt_control = true;
 		t_circle+=dt;
+
+		//warnx("(%3.3f,%3.3f,%3.3f) (%3.3f,%3.3f,%3.3f)",(double)_pos_sp(0),(double)_pos_sp(1),(double)_pos_sp(2),(double)_vel_sp(0),(double)_vel_sp(1),(double)_vel_sp(2));
 	} else {
 		//Should not be possible stay where we are
 		_reset_pos_sp = true;
