@@ -38,6 +38,7 @@ void BlockIBVSController::update()
 			_att_sp.get().yaw = _pos.get().yaw + _pyaw.update(_pos.get().yaw);
 			_att_sp.get().thrust = _t_sat.update(_piz.update(_img_moments.get().s[2]-1)-_dz.update(vz));
 			_att_sp.get().valid = true;
+                        _att_sp.get().timestamp = hrt_absolute_time();
 
 			
 		}
