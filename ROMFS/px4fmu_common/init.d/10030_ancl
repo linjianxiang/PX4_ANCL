@@ -141,6 +141,14 @@ then
 	param set MPC_ALT_MODE 0
 	param set MPC_MG 0.3000
 
+	# IBVS Control
+	param set IBVS_KL1 0.4
+	param set IBVS_KL2 1.2
+	param set IBVS_KH1 1.0
+	param set IBVS_KH2 4.4
+	param set IBVS_KPSI 0.60
+    param set IBVS_J3 0.05
+
 	#Circuit Breakers
 	param set CBRK_AIRSPD_CHK 162128
 	param set CBRK_FLIGHTTERM 121212
