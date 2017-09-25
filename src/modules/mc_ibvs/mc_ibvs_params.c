@@ -232,4 +232,74 @@ PARAM_DEFINE_FLOAT(IBVS_IFZ_I_MAX, 0.035f);
  */
 PARAM_DEFINE_FLOAT(IBVS_G, 0.0f);
 
+/**
+ * Gain for controller input thrust
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KL1, 0.4f);
 
+/**
+ * Gain for controller input thrust
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KL2, 1.2f);
+
+/**
+ * Gain for controller input thrust
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KH1, 1.0f);
+
+/**
+ * Gain for controller input thrust
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KH2, 4.4f);
+
+/**
+ * Gain for controller input thrust
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KPSI, 0.6f);
+
+/**
+ * Gain for controller input thrust
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_J3, 0.05f);
