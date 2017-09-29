@@ -35,12 +35,12 @@ void BlockIBVSController::update()
                         float fz = _kh2*(_piz.update(_img_moments.get().s[2]-1)-_dz.update(vz)/_kh1)+(float)15.696;
                         float m  = 1.6;
 
-                        _att_sp.get().roll = (m/fz)*_kl2*(_pix.update(_img_moments.get().s[0])-_dx.update(vx)/_kl1);
-                        _att_sp.get().pitch = -(m/fz)*_kl2*(_piy.update(_img_moments.get().s[1])-_dy.update(vy)/_kl1);
+                        _att_sp.get().roll   = -(m/fz)*_kl2*(_pix.update(_img_moments.get().s[0])-_dx.update(vx)/_kl1);
+                        _att_sp.get().pitch  = (m/fz)*_kl2*(_piy.update(_img_moments.get().s[1])-_dy.update(vy)/_kl1);
                         //_att_sp.get().yaw = _pos.get().yaw + _pyaw.update(_pos.get().yaw);
-                        _att_sp.get().yaw = _pos.get().yaw+_pyaw.update((_kpsi/_j3)*_img_moments.get().s[3]);
+                        _att_sp.get().yaw    = _pos.get().yaw+_pyaw.update((_kpsi)*_img_moments.get().s[3]);
                         _att_sp.get().thrust = _t_sat.update(fz);
-			_att_sp.get().valid = true;
+                        _att_sp.get().valid  = true;
                         _att_sp.get().timestamp = t1;
 
 			
