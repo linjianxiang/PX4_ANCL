@@ -31,15 +31,17 @@ void BlockIBVSController::update()
 			//convert velocity to body frame
 			float vx = _pos.get().vx*cosf(_pos.get().yaw)-_pos.get().vy*sinf(_pos.get().yaw);
 			float vy = _pos.get().vx*sinf(_pos.get().yaw)+_pos.get().vy*cosf(_pos.get().yaw);
-			float vz = _pos.get().vz;			
+                        float vz = _pos.get().vz;
+                        float fz = _kh2*(_piz.update(_img_moments.get().s[2]-1)-_dz.update(vz)/_kh1)+(float)15.696;
+                        float m  = 1.6;
 
-                        _att_sp.get().roll = _kl2*(_pix.update(_img_moments.get().s[0])-_dx.update(vx/_kl1));
-                        _att_sp.get().pitch = _kl2*(_piy.update(_img_moments.get().s[1])-_dy.update(vy/_kl1));
+                        _att_sp.get().roll = (m/fz)*_kl2*(_pix.update(_img_moments.get().s[0])-_dx.update(vx)/_kl1);
+                        _att_sp.get().pitch = -(m/fz)*_kl2*(_piy.update(_img_moments.get().s[1])-_dy.update(vy)/_kl1);
                         //_att_sp.get().yaw = _pos.get().yaw + _pyaw.update(_pos.get().yaw);
-                        _att_sp.get().yaw = (_kpsi/_j3)*_pyaw.update(_img_moments.get().s[3]);
-                        _att_sp.get().thrust = _t_sat.update(_kh2*(_piz.update(_img_moments.get().s[2]-1)-_dz.update(vz/_kh1)));
+                        _att_sp.get().yaw = _pos.get().yaw+_pyaw.update((_kpsi/_j3)*_img_moments.get().s[3]);
+                        _att_sp.get().thrust = _t_sat.update(fz);
 			_att_sp.get().valid = true;
-                        _att_sp.get().timestamp = hrt_absolute_time();
+                        _att_sp.get().timestamp = t1;
 
 			
 		}
