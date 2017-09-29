@@ -293,13 +293,25 @@ PARAM_DEFINE_FLOAT(IBVS_KH2, 4.4f);
 PARAM_DEFINE_FLOAT(IBVS_KPSI, 0.6f);
 
 /**
- * Gain for controller input thrust
+ * Value of vehicle mass in kg
  *
  * @unit norm
  * @min 0
- * @max 1.0
+ * @max 5
  * @decimal 2
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_J3, 0.05f);
+PARAM_DEFINE_FLOAT(IBVS_MASS, 1.6f);
+
+/**
+ * Value of gravity constant
+ *
+ * @unit norm
+ * @min 0
+ * @max 10
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_GRAV, 9.81f);
