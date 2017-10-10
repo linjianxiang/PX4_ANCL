@@ -34,10 +34,33 @@ void BlockIBVSController::update()
                         float vz = _pos.get().vz;
                         float fz = _kh2*(_img_moments.get().s[2]-1-(vz/_kh1))+_mass*_grav;
 
-                        _att_sp.get().roll   = -(_mass/fz)*_kl2*(_img_moments.get().s[1])-vy/_kl1;
-                        _att_sp.get().pitch  = (_mass/fz)*_kl2*(_img_moments.get().s[0])-vx/_kl1;
-                        _att_sp.get().yaw    = _pos.get().yaw+(_kpsi)*_img_moments.get().s[3];
-                        _att_sp.get().thrust = _t_sat.update((float)1.5-fz/(_mass*_grav));
+                        //Compute roll and check if saturation is necessary
+                        float phi_sp = -(_mass/fz)*_kl2*(_img_moments.get().s[1])-vy/_kl1;
+                        if(phi_sp > _phi_max){
+                            phi_sp = _phi_max;
+                        } else if (phi_sp < -_phi_max){
+                            phi_sp = -_phi_max;
+                        }
+                        _att_sp.get().roll   = phi_sp;
+
+                        //Compute the pitch and saturate if necessary
+                        float theta_sp = (_mass/fz)*_kl2*(_img_moments.get().s[0])-vx/_kl1;
+                        if(theta_sp > _theta_max){
+                            theta_sp = _theta_max;
+                        } else if (phi_sp < -_theta_max){
+                            theta_sp = -_theta_max;
+                        }
+                        _att_sp.get().pitch  = theta_sp;
+
+                        float yaw_sp = _pos.get().yaw+(_kpsi)*_img_moments.get().s[3];
+                        if( yaw_sp > _yaw_max){
+                            yaw_sp = _yaw_max;
+                        } else if (yaw_sp < -_yaw_max){
+                            yaw_sp = -_yaw_max;
+                        }
+                        _att_sp.get().yaw    = yaw_sp;
+                        //Thrust is 1 if at desired altitude + _thrust_g needed for hover
+                        _att_sp.get().thrust = _t_sat.update((float)1-fz/(_mass*_grav)+_thrust_g);
                         _att_sp.get().valid  = true;
                         _att_sp.get().timestamp = t1;
 
