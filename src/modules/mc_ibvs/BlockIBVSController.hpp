@@ -28,6 +28,10 @@ public:
 		h_kpsi      = param_find("IBVS_KPSI");
                 h_grav      = param_find("IBVS_GRAV");
                 h_mass      = param_find("IBVS_MASS");
+                h_phi_max   = param_find("IBVS_PHI_MAX");
+                h_theta_max = param_find("IBVS_THETA_MAX");
+                h_yaw_max   = param_find("IBVS_YAW_MAX");
+                h_thrust_g  = param_find("IBVS_G");
 		param_get(h_kl1,&_kl1);
 		param_get(h_kl2,&_kl2);
 		param_get(h_kh1,&_kh1);
@@ -35,6 +39,10 @@ public:
 		param_get(h_kpsi,&_kpsi);
                 param_get(h_grav,&_grav);
                 param_get(h_mass,&_mass);
+		param_get(h_phi_max,&_phi_max);
+		param_get(h_theta_max,&_theta_max);
+		param_get(h_yaw_max,&_yaw_max);
+		param_get(h_thrust_g,&_thrust_g);
 		_fds[0].fd = _img_moments.getHandle();
 		_fds[1].fd = _img_point.getHandle();
 		_fds[2].fd = _img_line.getHandle();
@@ -59,6 +67,10 @@ private:
 	param_t h_kpsi;
         param_t h_grav;
         param_t h_mass;
+	param_t h_phi_max;
+	param_t h_theta_max;
+	param_t h_yaw_max;
+	param_t h_thrust_g;
 	float _kl1;
 	float _kl2;
 	float _kh1;
@@ -66,5 +78,9 @@ private:
 	float _kpsi;
         float _grav;
         float _mass;
+        float _phi_max;
+        float _theta_max;
+        float _yaw_max;
+	float _thrust_g;
 	uint64_t _t;
 };
