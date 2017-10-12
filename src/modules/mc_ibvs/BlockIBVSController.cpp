@@ -36,7 +36,7 @@ void BlockIBVSController::update()
                         float fz = _kh2*(_img_moments.get().s[2]-1-(vz/_kh1));
 
                         //Compute roll and check if saturation is necessary
-                        float phi_sp = _kl2*(_img_moments.get().s[1])-vy/_kl1;
+                        float phi_sp = _kl2*(_img_moments.get().s[1]-vy/_kl1);
 //                        float phi_sp = (_mass/fz)*_kl2*(_img_moments.get().s[1])-vy/_kl1;
 //                        if(phi_sp > _phi_max){
 //                            phi_sp = _phi_max;
@@ -46,7 +46,7 @@ void BlockIBVSController::update()
                         _att_sp.get().roll   = phi_sp;
 
                         //Compute the pitch and saturate if necessary
-                        float theta_sp = -_kl2*(_img_moments.get().s[0])+vx/_kl1;
+                        float theta_sp = -_kl2*(_img_moments.get().s[0]-vx/_kl1);
 //                        float theta_sp = -((_mass/fz)*_kl2*(_img_moments.get().s[0])-vx/_kl1);
 //                        if(theta_sp > _theta_max){
 //                            theta_sp = _theta_max;
@@ -64,7 +64,7 @@ void BlockIBVSController::update()
                         float yaw_sp = _pos.get().yaw+(_kpsi)*moment_s3;
                         _att_sp.get().yaw    = yaw_sp;
                         //Thrust is 1 if at desired altitude + _thrust_g needed for hover
-                        _att_sp.get().thrust = _t_sat.update(-fz);
+                        _att_sp.get().thrust = _t_sat.update(-fz+_thrust_g);
                         _att_sp.get().valid  = true;
                         _att_sp.get().timestamp = t1;
 
