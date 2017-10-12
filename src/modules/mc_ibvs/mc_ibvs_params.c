@@ -230,7 +230,7 @@ PARAM_DEFINE_FLOAT(IBVS_IFZ_I_MAX, 0.035f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_G, 0.4f);
+PARAM_DEFINE_FLOAT(IBVS_G, 0.5f);
 
 /**
  * Gain for controller input thrust
@@ -278,7 +278,7 @@ PARAM_DEFINE_FLOAT(IBVS_KH1, 1.0f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_KH2, 4.4f);
+PARAM_DEFINE_FLOAT(IBVS_KH2, 0.4f);
 
 /**
  * Gain for controller input thrust
@@ -291,30 +291,6 @@ PARAM_DEFINE_FLOAT(IBVS_KH2, 4.4f);
  * @group Multicopter IBVS Control
  */
 PARAM_DEFINE_FLOAT(IBVS_KPSI, 0.6f);
-
-/**
- * Value of vehicle mass in kg
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_MASS, 1.6f);
-
-/**
- * Value of gravity constant
- *
- * @unit norm
- * @min 0
- * @max 10
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_GRAV, 9.81f);
 
 /**
  * Maximum allowed roll angle

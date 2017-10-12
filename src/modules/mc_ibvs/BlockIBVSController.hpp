@@ -26,8 +26,6 @@ public:
 		h_kh1       = param_find("IBVS_KH1");
 		h_kh2       = param_find("IBVS_KH2");
 		h_kpsi      = param_find("IBVS_KPSI");
-                h_grav      = param_find("IBVS_GRAV");
-                h_mass      = param_find("IBVS_MASS");
                 h_phi_max   = param_find("IBVS_PHI_MAX");
                 h_theta_max = param_find("IBVS_THETA_MAX");
                 h_yaw_max   = param_find("IBVS_YAW_MAX");
@@ -37,8 +35,6 @@ public:
 		param_get(h_kh1,&_kh1);
 		param_get(h_kh2,&_kh2);
 		param_get(h_kpsi,&_kpsi);
-                param_get(h_grav,&_grav);
-                param_get(h_mass,&_mass);
 		param_get(h_phi_max,&_phi_max);
 		param_get(h_theta_max,&_theta_max);
 		param_get(h_yaw_max,&_yaw_max);
@@ -65,8 +61,6 @@ private:
 	param_t h_kh1;
 	param_t h_kh2;
 	param_t h_kpsi;
-        param_t h_grav;
-        param_t h_mass;
 	param_t h_phi_max;
 	param_t h_theta_max;
 	param_t h_yaw_max;
@@ -76,8 +70,6 @@ private:
 	float _kh1;
 	float _kh2;
 	float _kpsi;
-        float _grav;
-        float _mass;
         float _phi_max;
         float _theta_max;
         float _yaw_max;
