@@ -230,7 +230,7 @@ PARAM_DEFINE_FLOAT(IBVS_IFZ_I_MAX, 0.035f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_G, 0.5f);
+PARAM_DEFINE_FLOAT(IBVS_G, 0.3f);
 
 /**
  * Gain for controller input thrust
@@ -242,7 +242,7 @@ PARAM_DEFINE_FLOAT(IBVS_G, 0.5f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_KL1, 0.4f);
+PARAM_DEFINE_FLOAT(IBVS_KL1, 0.8f);
 
 /**
  * Gain for controller input thrust
@@ -254,7 +254,7 @@ PARAM_DEFINE_FLOAT(IBVS_KL1, 0.4f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_KL2, 1.2f);
+PARAM_DEFINE_FLOAT(IBVS_KL2, 0.4f);
 
 /**
  * Gain for controller input thrust
