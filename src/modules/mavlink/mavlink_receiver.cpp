@@ -2032,6 +2032,7 @@ void MavlinkReceiver::handle_message_img_moments(mavlink_message_t *msg)
         img_moments_data.s[1]=(float)img_moments.s[1];
         img_moments_data.s[2]=(float)img_moments.s[2];
         img_moments_data.s[3]=(float)img_moments.s[3];
+        img_moments_data.valid=(uint8_t)img_moments.valid;
 
         if (_img_moments_pub == nullptr) {
                 _img_moments_pub = orb_advertise(ORB_ID(img_moments),&img_moments_data);

@@ -3750,6 +3750,7 @@ protected:
                         msg.s[1] = (float)(img_moments.s[1]);
                         msg.s[2] = (float)(img_moments.s[2]);
                         msg.s[3] = (float)(img_moments.s[3]);
+                        msg.valid = (uint8_t)(img_moments.valid);
                         mavlink_msg_img_moments_send_struct(_mavlink->get_channel(), &msg);
                 }
         }
