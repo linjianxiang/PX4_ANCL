@@ -13,13 +13,14 @@ void BlockIBVSController::update()
 		uint64_t t1 = hrt_absolute_time();
 		float dt = (t1 - _t) / 1.0e6f;
 		_t=t1;
+
+                //Set message timestamp
+                _att_sp.get().timestamp = t1;
+
 		// check for sane values of dt
 		if (dt>1.0f || dt<0) {
 			warn("dt=%3.3f",(double)dt);
 			_att_sp.get().valid=false;
-                } else if (_img_moments.get().s[2] == 0 ) {
-                        //S3==0 is only possible if the points aren't in the frame or not enough points
-                        _att_sp.get().valid=false;
 		} else {
 			// set dt for all child blocks
 			setDt(dt);
@@ -30,6 +31,12 @@ void BlockIBVSController::update()
 			// get new information from subscriptions
 			updateSubscriptions();
 
+                        if (_img_moments.get().valid == (int)0 ) {
+                            //Only non-zero values are valid
+                            _att_sp.get().valid=false;
+
+                        } else {
+
 			//Calculate Control
 			//convert velocity to body frame
 			float vx = _pos.get().vx*cosf(_pos.get().yaw)-_pos.get().vy*sinf(_pos.get().yaw);
@@ -39,20 +46,20 @@ void BlockIBVSController::update()
 
                         //Compute roll and check if saturation is necessary
                         float phi_sp = _kl2*(_img_moments.get().s[1]-vy/_kl1);
-                        if(phi_sp > _phi_max){
-                            phi_sp = _phi_max;
-                        } else if (phi_sp < -_phi_max){
-                            phi_sp = -_phi_max;
-                        }
+//                        if(phi_sp > _phi_max){
+//                            phi_sp = _phi_max;
+//                        } else if (phi_sp < -_phi_max){
+//                            phi_sp = -_phi_max;
+//                        }
                         _att_sp.get().roll   = phi_sp;
 
                         //Compute the pitch and saturate if necessary
                         float theta_sp = -_kl2*(_img_moments.get().s[0]-vx/_kl1);
-                        if(theta_sp > _theta_max){
-                            theta_sp = _theta_max;
-                        } else if (phi_sp < -_theta_max){
-                            theta_sp = -_theta_max;
-                        }
+//                        if(theta_sp > _theta_max){
+//                            theta_sp = _theta_max;
+//                        } else if (phi_sp < -_theta_max){
+//                            theta_sp = -_theta_max;
+//                        }
                         _att_sp.get().pitch  = theta_sp;
 
                         float moment_s3 = _img_moments.get().s[3];
@@ -63,12 +70,12 @@ void BlockIBVSController::update()
                         }
                         float yaw_sp = _pos.get().yaw+(_kpsi)*moment_s3;
                         _att_sp.get().yaw    = yaw_sp;
+
                         //Thrust is 1 if at desired altitude + _thrust_g needed for hover
                         _att_sp.get().thrust = _t_sat.update(-fz+_thrust_g);
                         _att_sp.get().valid  = true;
-                        _att_sp.get().timestamp = t1;
 
-			
+                        }
 		}
 	}
 	
