@@ -55,6 +55,7 @@
 #include <arch/board/board.h>
 #include <errno.h>
 #include <uORB/topics/img_moments.h>
+#include <uORB/topics/vehicle_image_attitude_setpoint.h>
 #include <math.h>
 #include <systemlib/scheduling_priorities.h>
 
@@ -163,6 +164,7 @@ int img_moments_main(int argc, char *argv[])
 {
         int sub=-1;
         struct img_moments_s data;
+        struct vehicle_image_attitude_setpoint_s img_sp;
         memset(&data,0,sizeof(data));
 
         if (argc < 2) {
@@ -177,11 +179,12 @@ int img_moments_main(int argc, char *argv[])
 			if (fake_img_moments::fake !=nullptr)
 			PX4_INFO("FAKE DATA!!!");
                         orb_copy(ORB_ID(img_moments), sub, &data);
-                        PX4_INFO("Timestamp: (%d)",data.usec);
-                        PX4_INFO("s1 of Objects: (%.2f)",(double)data.s[0]);
-                        PX4_INFO("s2 of Objects: (%.2f)",(double)data.s[1]);
-                        PX4_INFO("s3 of Objects: (%.2f)",(double)data.s[2]);
-                        PX4_INFO("s4 of Objects: (%.2f)",(double)data.s[3]);
+                        PX4_INFO("Timestamp: (%u)",data.usec);
+                        PX4_INFO("s1 of Objects: (%.5f)",(double)data.s[0]);
+                        PX4_INFO("s2 of Objects: (%.5f)",(double)data.s[1]);
+                        PX4_INFO("s3 of Objects: (%.5f)",(double)data.s[2]);
+                        PX4_INFO("s4 of Objects: (%.5f)",(double)data.s[3]);
+                        PX4_INFO("Valid: %u",data.valid);
                 } else {
                         PX4_INFO("Could not subscribe to img_moments topic");
                 }
@@ -220,6 +223,29 @@ int img_moments_main(int argc, char *argv[])
 		}
 
 	}
+
+        if (!strcmp(argv[1], "ibvs")) {
+                sub = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
+                if (sub>0) {
+                        PX4_INFO("Image moments:");
+                        orb_copy(ORB_ID(vehicle_image_attitude_setpoint), sub, &img_sp);
+                        PX4_INFO("Timestamp: (%" PRIu64 ")",img_sp.timestamp);
+                        PX4_INFO("Roll: (%.5f)",(double)img_sp.roll);
+                        PX4_INFO("Pitch: (%.5f)",(double)img_sp.pitch);
+                        PX4_INFO("Yaw: (%.5f)",(double)img_sp.yaw);
+                        PX4_INFO("Thrust: (%.5f)",(double)img_sp.thrust);
+                        if(img_sp.valid){
+                            PX4_INFO("Valid: TRUE");
+                        } else {
+                            PX4_INFO("Valid: FALSE");
+                        }
+
+                } else {
+                        PX4_INFO("Could not subscribe to vehicle_image_attitude_setpoint topic");
+                }
+                sub = orb_unsubscribe(sub);
+                return 0;
+        }
 
 
 

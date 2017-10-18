@@ -104,7 +104,7 @@ int mc_ibvs_main(int argc, char *argv[])
 	if (!strcmp(argv[1], "start")) {
 
 		if (ibvs::thread_running) {
-			warnx("already running");
+                        warnx("mc_ibvs already running");
 			/* this is not an error */
 			exit(0);
 		}
@@ -127,10 +127,46 @@ int mc_ibvs_main(int argc, char *argv[])
 
 	if (!strcmp(argv[1], "status")) {
 		if (ibvs::thread_running) {
-			warnx("is running");
+                        struct img_moments_s data;
+                        struct vehicle_image_attitude_setpoint_s img_sp;
+                        int sub=-1;
+                        int sub1=-1;
+                        warnx("mc_ibvs is running");
+                        sub = orb_subscribe(ORB_ID(img_moments));
+                        sub1 = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
+                        if(sub>0){
+                            PX4_INFO("IMAGE MOMENTS RECEIVED");
+                            orb_copy(ORB_ID(img_moments), sub, &data);
+                            PX4_INFO("Timestamp: (%u)",data.usec);
+                            PX4_INFO("s1 of Objects: (%.5f)",(double)data.s[0]);
+                            PX4_INFO("s2 of Objects: (%.5f)",(double)data.s[1]);
+                            PX4_INFO("s3 of Objects: (%.5f)",(double)data.s[2]);
+                            PX4_INFO("s4 of Objects: (%.5f)",(double)data.s[3]);
+                            PX4_INFO("Valid: %u",data.valid);
+                        } else {
+                                PX4_INFO("Could not subscribe to img_moments topic");
+                        }
+                        sub = orb_unsubscribe(sub);
+                        if (sub1>0) {
+                            PX4_INFO("MC_IBVS OUTPUT");
+                            orb_copy(ORB_ID(vehicle_image_attitude_setpoint), sub1, &img_sp);
+                            PX4_INFO("Timestamp: (%" PRIu64 ")",img_sp.timestamp);
+                            PX4_INFO("Roll: (%.5f)",(double)img_sp.roll);
+                            PX4_INFO("Pitch: (%.5f)",(double)img_sp.pitch);
+                            PX4_INFO("Yaw: (%.5f)",(double)img_sp.yaw);
+                            PX4_INFO("Thrust: (%.5f)",(double)img_sp.thrust);
+                            if(img_sp.valid){
+                                PX4_INFO("Valid: TRUE");
+                            } else {
+                                PX4_INFO("Valid: FALSE");
+                            }
+                        } else {
+                                PX4_INFO("Could not subscribe to vehicle_image_attitude_setpoint topic");
+                        }
+                        sub1 = orb_unsubscribe(sub1);
 
 		} else {
-			warnx("not started");
+                        warnx("mc_ibvs not started");
 		}
 
 		exit(0);
