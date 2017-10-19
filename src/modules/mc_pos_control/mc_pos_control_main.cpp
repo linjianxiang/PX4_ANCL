@@ -1441,6 +1441,7 @@ MulticopterPositionControl::task_main()
 	_pos_sp_triplet_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
 	_local_pos_sp_sub = orb_subscribe(ORB_ID(vehicle_local_position_setpoint));
 	_global_vel_sp_sub = orb_subscribe(ORB_ID(vehicle_global_velocity_setpoint));
+        _image_att_sp_sub = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
 
 
 	parameters_update(true);
@@ -2330,7 +2331,7 @@ MulticopterPositionControl::task_main()
 		}
 
 		/* update previous velocity for velocity controller D part */
-		_vel_prev = _vel;
+                _vel_prev = _vel;
 
 		/* publish attitude setpoint
 		 * Do not publish if offboard is enabled but position/velocity/accel control is disabled,
