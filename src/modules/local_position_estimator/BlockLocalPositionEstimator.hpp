@@ -125,6 +125,8 @@ class BlockLocalPositionEstimator : public control::SuperBlock
 //
 // 	land (detects when landed)): pz (always measures agl = 0)
 //
+//	vicon: px, py, pz, vx, vy, vz
+//
 public:
 
 	// constants
@@ -284,6 +286,7 @@ private:
 	BlockParamFloat  _accel_z_stddev;
 
 	// baro parameters
+	BlockParamInt	_baro_on;
 	BlockParamFloat  _baro_stddev;
 
 	// gps parameters
@@ -304,6 +307,7 @@ private:
 
 	// mocap parameters
 	BlockParamFloat  _mocap_p_stddev;
+	BlockParamInt	_mocap_on;
 
 	// vicon parameters
 	BlockParamInt _vicon_on;
