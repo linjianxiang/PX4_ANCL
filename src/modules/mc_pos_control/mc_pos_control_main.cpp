@@ -1393,7 +1393,7 @@ void MulticopterPositionControl::control_ancl(float dt) {
 			t_circle=0;
 		}
 
-		if (t_circle<T0) { //Straight line to circle
+		/*if (t_circle<T0) { //Straight line to circle
 			_pos_sp(0) = _params.circle_r*t_circle/T0;
 			_pos_sp(1) = 0.0;
 			_pos_sp(2) = -1.0f;
@@ -1408,7 +1408,14 @@ void MulticopterPositionControl::control_ancl(float dt) {
 		}
 
 		_run_alt_control = true;
-		t_circle+=dt;
+		t_circle+=dt;*/
+
+		_pos_sp(0) = 0;
+		_pos_sp(1) = 0;
+		_pos_sp(2) = -1.0f;
+		_run_pos_control = true;
+		_run_alt_control = true;
+	
 
 		//warnx("(%3.3f,%3.3f,%3.3f) (%3.3f,%3.3f,%3.3f)",(double)_pos_sp(0),(double)_pos_sp(1),(double)_pos_sp(2),(double)_vel_sp(0),(double)_vel_sp(1),(double)_vel_sp(2));
 	} else {

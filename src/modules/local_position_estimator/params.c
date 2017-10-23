@@ -126,6 +126,14 @@ PARAM_DEFINE_FLOAT(LPE_ACC_XY, 0.012f);
 PARAM_DEFINE_FLOAT(LPE_ACC_Z, 0.02f);
 
 /**
+ * Baro correction
+ *
+ * @group Local Position Estimator
+ * @boolean
+ */
+PARAM_DEFINE_INT32(LPE_BAR_ON, 1);
+
+/**
  * Barometric presssure altitude z standard deviation.
  *
  * @group Local Position Estimator
@@ -265,7 +273,15 @@ PARAM_DEFINE_FLOAT(LPE_VIS_Z, 0.5f);
 PARAM_DEFINE_INT32(LPE_VIS_ON, 1);
 
 /**
- * Vicon position standard deviation.
+ * Mocap correction
+ *
+ * @group Local Position Estimator
+ * @boolean
+ */
+PARAM_DEFINE_INT32(LPE_VIC_ON, 0);
+
+/**
+ * Mocap position standard deviation.
  *
  * @group Local Position Estimator
  * @unit m

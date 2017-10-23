@@ -67,7 +67,10 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_lidar_z_offset(this, "LDR_OFF_Z"),
 	_accel_xy_stddev(this, "ACC_XY"),
 	_accel_z_stddev(this, "ACC_Z"),
+
+	_baro_on(this, "BAR_ON"),
 	_baro_stddev(this, "BAR_Z"),
+
 	_gps_on(this, "GPS_ON"),
 	_gps_delay(this, "GPS_DELAY"),
 	_gps_xy_stddev(this, "GPS_XY"),
@@ -76,14 +79,19 @@ BlockLocalPositionEstimator::BlockLocalPositionEstimator() :
 	_gps_vz_stddev(this, "GPS_VZ"),
 	_gps_eph_max(this, "EPH_MAX"),
 	_gps_epv_max(this, "EPV_MAX"),
+
 	_vision_xy_stddev(this, "VIS_XY"),
 	_vision_z_stddev(this, "VIS_Z"),
 	_vision_delay(this, "VIS_DELAY"),
 	_vision_on(this, "VIS_ON"),
+
 	_mocap_p_stddev(this, "VIC_P"),
+	_mocap_on(this, "VIC_ON"),
+
 	_vicon_on(this,"VCN_ON"),
 	_vicon_p_stddev(this,"VCN_P"),
 	_vicon_v_stddev(this,"VCN_V"),
+
 	_flow_gyro_comp(this, "FLW_GYRO_CMP"),
 	_flow_z_offset(this, "FLW_OFF_Z"),
 	_flow_scale(this, "FLW_SCALE"),
@@ -290,10 +298,10 @@ void BlockLocalPositionEstimator::update()
 	// see which updates are available
 	bool flowUpdated = _sub_flow.updated();
 	bool paramsUpdated = _sub_param_update.updated();
-	bool baroUpdated = _sub_sensor.updated();
+	bool baroUpdated = _baro_on.get() && _sub_sensor.updated();
 	bool gpsUpdated = _gps_on.get() && _sub_gps.updated();
 	bool visionUpdated = _vision_on.get() && _sub_vision_pos.updated();
-	bool mocapUpdated = _sub_mocap.updated();
+	bool mocapUpdated = _mocap_on.get() && _sub_mocap.updated();
 	bool viconUpdated = _vicon_on.get() && _sub_vicon.updated();
 	bool lidarUpdated = (_sub_lidar != NULL) && _sub_lidar->updated();
 	bool sonarUpdated = (_sub_sonar != NULL) && _sub_sonar->updated();
