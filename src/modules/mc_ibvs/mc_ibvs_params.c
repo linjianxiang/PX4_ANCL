@@ -233,7 +233,7 @@ PARAM_DEFINE_FLOAT(IBVS_IFZ_I_MAX, 0.035f);
 PARAM_DEFINE_FLOAT(IBVS_G, 0.3f);
 
 /**
- * Gain for controller input thrust
+ * Gain for controller input roll on v1
  *
  * @unit norm
  * @min 0
@@ -242,7 +242,43 @@ PARAM_DEFINE_FLOAT(IBVS_G, 0.3f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_KL1, 0.8f);
+PARAM_DEFINE_FLOAT(IBVS_KL1_R, 0.8f);
+
+/**
+ * Gain for controller input roll
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KL2_R, 0.3f);
+
+/**
+ * Gain for controller input pitch on v2
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KL1_P, 0.8f);
+
+/**
+ * Gain for controller input pitch
+ *
+ * @unit norm
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter IBVS Control
+ */
+PARAM_DEFINE_FLOAT(IBVS_KL2_P, 0.15f);
 
 /**
  * Gain for controller input thrust
@@ -254,7 +290,7 @@ PARAM_DEFINE_FLOAT(IBVS_KL1, 0.8f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_KL2, 0.4f);
+PARAM_DEFINE_FLOAT(IBVS_KH1, 1.1f);
 
 /**
  * Gain for controller input thrust
@@ -266,19 +302,7 @@ PARAM_DEFINE_FLOAT(IBVS_KL2, 0.4f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_KH1, 1.0f);
-
-/**
- * Gain for controller input thrust
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_KH2, 0.4f);
+PARAM_DEFINE_FLOAT(IBVS_KH2, 0.3f);
 
 /**
  * Gain for controller input thrust
@@ -291,39 +315,3 @@ PARAM_DEFINE_FLOAT(IBVS_KH2, 0.4f);
  * @group Multicopter IBVS Control
  */
 PARAM_DEFINE_FLOAT(IBVS_KPSI, 0.6f);
-
-/**
- * Maximum allowed roll angle
- *
- * @unit norm
- * @min 0
- * @max 3.14
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_PHI_MAX, 0.4f);
-
-/**
- * Maximum allowed pitch angle
- *
- * @unit norm
- * @min 0
- * @max 1.57
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_THETA_MAX, 0.4f);
-
-/**
- * Maximum allowed yaw angle
- *
- * @unit norm
- * @min 0
- * @max 1.57
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_YAW_MAX, 0.4f);

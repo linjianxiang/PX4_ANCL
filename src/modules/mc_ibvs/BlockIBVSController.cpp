@@ -45,7 +45,7 @@ void BlockIBVSController::update()
                         float fz = _kh2*(_img_moments.get().s[2]-1-(vz/_kh1));
 
                         //Compute roll and check if saturation is necessary
-                        float phi_sp = _kl2*(_img_moments.get().s[1]-vy/_kl1);
+                        float phi_sp = _kl2_roll*(_img_moments.get().s[1]-vy/_kl1_roll);
 //                        if(phi_sp > _phi_max){
 //                            phi_sp = _phi_max;
 //                        } else if (phi_sp < -_phi_max){
@@ -54,7 +54,7 @@ void BlockIBVSController::update()
                         _att_sp.get().roll   = phi_sp;
 
                         //Compute the pitch and saturate if necessary
-                        float theta_sp = -_kl2*(_img_moments.get().s[0]-vx/_kl1);
+                        float theta_sp = -_kl2_pitch*(_img_moments.get().s[0]-vx/_kl1_pitch);
 //                        if(theta_sp > _theta_max){
 //                            theta_sp = _theta_max;
 //                        } else if (phi_sp < -_theta_max){
