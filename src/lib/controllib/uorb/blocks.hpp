@@ -45,6 +45,11 @@
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/position_setpoint_triplet.h>
+
+//modified by yunzhi
+#include <uORB/topics/vehicle_global_velocity_setpoint.h>
+
+
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/actuator_controls.h>
@@ -131,6 +136,39 @@ public:
 	BlockIBVSOuterLoop(SuperBlock *parent, const char *name);
 	virtual ~BlockIBVSOuterLoop();
 };
+
+
+
+/**
+ * yunzhi NewPID Outer Loop with uORB
+ */
+
+
+class __EXPORT BlockNewPIDOuterLoop : public SuperBlock
+{
+protected:
+        //subscriptions
+        //uORB::Subscription<vehicle_attitude_s> _att;
+
+        //uORB::Subscription<img_moments_s> _img_moments;
+        //uORB::Subscription<img_point_s> _img_point;
+        //uORB::Subscription<img_line_s> _img_line;
+		
+		
+		//modified by yunzhi
+		uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp;
+		
+        uORB::Subscription<vehicle_status_s> _status;
+        uORB::Subscription<parameter_update_s> _param_update;
+
+        uORB::Subscription<vehicle_local_position_s> _pos;
+        //publications
+        uORB::Publication<vehicle_image_attitude_setpoint_s> _att_sp;
+public:
+        BlockNewPIDOuterLoop(SuperBlock *parent, const char *name);
+        virtual ~BlockNewPIDOuterLoop();
+};
+
 
 } // namespace control
 
