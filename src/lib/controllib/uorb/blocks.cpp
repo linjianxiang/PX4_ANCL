@@ -127,7 +127,7 @@ BlockNewPIDOuterLoop::BlockNewPIDOuterLoop(SuperBlock *parent, const char *name)
         //_img_line(ORB_ID(img_line),20,0,&getSubscriptions()),
 		
 		//modified by yunzhi
-		_vel_sp(ORB_ID(vehicle_global_velocity_setpoint), 20, 0, &getSubscriptions()),
+		//_vel_sp_LIN(ORB_ID(vehicle_global_velocity_setpoint), 20, 0, &getSubscriptions()),
 		
         _status(ORB_ID(vehicle_status), 20, 0, &getSubscriptions()),
         _param_update(ORB_ID(parameter_update), 1000, 0, &getSubscriptions()), // limit to 1 Hz

@@ -2,14 +2,18 @@
 
 #include <px4_posix.h>
 #include <controllib/uorb/blocks.hpp>
+//#include <math.h>
+#include <vector>
 
+
+using namespace std;
 using namespace control;
 
 class BlockNewPIDController : public control::BlockNewPIDOuterLoop
 {
 public:
 	BlockNewPIDController() :
-		BlockNewPIDOuterLoop(NULL,"NewPID"),
+		BlockNewPIDOuterLoop(NULL,"NPID"),
 		//_pix(this,"IFX"),
 		//_piy(this,"IFY"),
 		//_piz(this,"IFZ"),
@@ -25,12 +29,17 @@ public:
 		_pyaw(this,"YAW_P"),
 		_t_sat(this,"T"),
 		_fds(),
-		_t(0) 
+		_t(0),
+		_pos_sp()
 	{
 		_fds[0].fd =_pos.getHandle();
 		
 		_fds[0].events = POLLIN;
-		
+
+		_pos_sp.push_back(0);
+		_pos_sp.push_back(0);
+		_pos_sp.push_back(-1);
+
 		/*
 		_fds[0].fd = _img_moments.getHandle();
 		_fds[1].fd = _img_point.getHandle();
@@ -58,4 +67,6 @@ private:
 	px4_pollfd_struct_t _fds[1];
 	//px4_pollfd_struct_t _fds[3];
 	uint64_t _t;
+
+	vector<float> _pos_sp;
 };

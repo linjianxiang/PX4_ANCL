@@ -32,8 +32,8 @@
  ****************************************************************************/
 
 /**
- * @file mc_NewPID_params.c
- * Multicopter NewPID controller parameters.
+ * @file mc_NPID_params.c
+ * Multicopter NPID controller parameters.
  *
  * @author Geoff <gfink@ualberta.ca>
  */
@@ -47,12 +47,10 @@
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NewPID_PID_X_P, 0.1f);
-
-
+PARAM_DEFINE_FLOAT(NPID_PID_X_P, 0.1f);
 
 /**
  * Gain for image around image y axis in Body frame (Camera Frame)
@@ -62,9 +60,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_X_P, 0.1f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_Y_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_Y_P, 0.1f);
 
 /**
  * Gain for image around image z axis  in Body frame (Camera Frame)
@@ -74,9 +72,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_Y_P, 0.1f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_Z_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_Z_P, 0.1f);
 
 /**
  * Gain for velocity around image x axis in Body frame (Camera Frame)
@@ -86,9 +84,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_Z_P, 0.1f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_VX_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_VX_P, 0.1f);
 
 /**
  * Gain for velocity around image yx axis in Body frame (Camera Frame)
@@ -98,9 +96,9 @@ PARAM_DEFINE_FLOAT(NewPID_VX_P, 0.1f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_VY_P,0.1f);
+PARAM_DEFINE_FLOAT(NPID_VY_P,0.1f);
 
 /**
  * Gain for velocity around image z axis in Body frame (Camera Frame)
@@ -110,9 +108,9 @@ PARAM_DEFINE_FLOAT(NewPID_VY_P,0.1f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_VZ_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_VZ_P, 0.1f);
 
 /**
  * Gain for integral
@@ -122,9 +120,9 @@ PARAM_DEFINE_FLOAT(NewPID_VZ_P, 0.1f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_X_I, 0.0f);
+PARAM_DEFINE_FLOAT(NPID_PID_X_I, 0.0f);
 
 /**
  * Gain for integral
@@ -134,9 +132,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_X_I, 0.0f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_Y_I, 0.0f);
+PARAM_DEFINE_FLOAT(NPID_PID_Y_I, 0.0f);
 
 /**
  * Gain for integral
@@ -146,9 +144,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_Y_I, 0.0f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_Z_I, 0.0f);
+PARAM_DEFINE_FLOAT(NPID_PID_Z_I, 0.0f);
 
 /**
  * Gain for yaw
@@ -158,9 +156,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_Z_I, 0.0f);
  * @max 5.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_YAW_P,0.6f);
+PARAM_DEFINE_FLOAT(NPID_YAW_P,0.6f);
 
 /**
  * Thrust Saturation
@@ -170,9 +168,9 @@ PARAM_DEFINE_FLOAT(NewPID_YAW_P,0.6f);
  * @max 1.0
  * @decimal 3
  * @increment 0.001
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_T_MIN, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_T_MIN, 0.1f);
 
 /**
  * Thrust Saturation
@@ -182,9 +180,9 @@ PARAM_DEFINE_FLOAT(NewPID_T_MIN, 0.1f);
  * @max 1.0
  * @decimal 3
  * @increment 0.001
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_T_MAX, 0.9f);
+PARAM_DEFINE_FLOAT(NPID_T_MAX, 0.9f);
 
 
 /**
@@ -195,9 +193,9 @@ PARAM_DEFINE_FLOAT(NewPID_T_MAX, 0.9f);
  * @max 1.0
  * @decimal 3
  * @increment 0.001
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_X_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(NPID_PID_X_I_MAX, 0.035f);
 
 /**
  * s2 integral Saturation
@@ -207,9 +205,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_X_I_MAX, 0.035f);
  * @max 1.0
  * @decimal 3
  * @increment 0.001
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_Y_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(NPID_PID_Y_I_MAX, 0.035f);
 
 /**
  * s3 integral Saturation
@@ -219,9 +217,9 @@ PARAM_DEFINE_FLOAT(NewPID_PID_Y_I_MAX, 0.035f);
  * @max 1.0
  * @decimal 3
  * @increment 0.001
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_PID_Z_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(NPID_PID_Z_I_MAX, 0.035f);
 
 /**
  * thrust required for gravity
@@ -231,8 +229,8 @@ PARAM_DEFINE_FLOAT(NewPID_PID_Z_I_MAX, 0.035f);
  * @max 1.0
  * @decimal 2
  * @increment 0.01
- * @group Multicopter NewPID Control
+ * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NewPID_G, 0.0f);
+PARAM_DEFINE_FLOAT(NPID_G, 0.0f);
 
 

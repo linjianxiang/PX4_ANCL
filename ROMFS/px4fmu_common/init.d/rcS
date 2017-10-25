@@ -711,7 +711,7 @@ then
 	# Start MAVLink on USB, developers can use the MAVLink shell
 	#mavlink start -r 60000 -d /dev/ttyACM0 -m config
 
-	nshterm /dev/ttyACM0 & 
+	nshterm /dev/ttyUSB0 & 
 	#
 	# Logging
 	#

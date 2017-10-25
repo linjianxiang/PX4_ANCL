@@ -47,7 +47,7 @@
 #include <uORB/topics/position_setpoint_triplet.h>
 
 //modified by yunzhi
-#include <uORB/topics/vehicle_global_velocity_setpoint.h>
+//#include <uORB/topics/vehicle_global_velocity_setpoint.h>
 
 
 #include <uORB/topics/manual_control_setpoint.h>
@@ -156,7 +156,7 @@ protected:
 		
 		
 		//modified by yunzhi
-		uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp;
+		//uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp_LIN;
 		
         uORB::Subscription<vehicle_status_s> _status;
         uORB::Subscription<parameter_update_s> _param_update;

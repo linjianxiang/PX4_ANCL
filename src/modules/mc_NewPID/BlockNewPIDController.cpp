@@ -16,6 +16,11 @@ void BlockNewPIDController::update()
 		uint64_t t1 = hrt_absolute_time();
 		float dt = (t1 - _t) / 1.0e6f;
 		_t=t1;
+
+		
+		
+
+
 		// check for sane values of dt
 		if (dt>1.0f || dt<0) {
 			warn("dt=%3.3f",(double)dt);
@@ -32,7 +37,9 @@ void BlockNewPIDController::update()
 
 			// get new information from subscriptions
 			updateSubscriptions();
-
+			
+			
+			
 			//Calculate Control
 			//convert velocity to body frame
 
@@ -58,14 +65,16 @@ void BlockNewPIDController::update()
 
 			// keep it
 			
+			
+			//float vx = _pos.get().vx*cosf(_pos.get().yaw)-_pos.get().vy*sinf(_pos.get().yaw);
+			//float vy = _pos.get().vx*sinf(_pos.get().yaw)+_pos.get().vy*cosf(_pos.get().yaw);
+			//float vz = _pos.get().vz;			 
+
+
+		
+			_att_sp.get().roll = _pidx.update(_pos_sp[0]-_pos.get().vx);
+			
 			/*
-			float vx = _pos.get().vx*cosf(_pos.get().yaw)-_pos.get().vy*sinf(_pos.get().yaw);
-			float vy = _pos.get().vx*sinf(_pos.get().yaw)+_pos.get().vy*cosf(_pos.get().yaw);
-			float vz = _pos.get().vz;			 
-
-
-
-			_att_sp.get().roll = _pidx.update(_vel_sp(0)-_pos.get().vx);
 			_att_sp.get().pitch = _pidy.update(_vel_sp(1)-_pos.get().vy)-_dy.update(vy);
 
 			_att_sp.get().yaw = _pos.get().yaw + _pyaw.update(_pos.get().yaw);
