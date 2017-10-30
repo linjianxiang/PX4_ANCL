@@ -49,7 +49,7 @@
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_IFX_P, 0.1f);
+PARAM_DEFINE_FLOAT(IBVS_IFX_P, 0.15f);
 
 /**
  * Gain for image around image y axis in Body frame (Camera Frame)
@@ -61,7 +61,7 @@ PARAM_DEFINE_FLOAT(IBVS_IFX_P, 0.1f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_IFY_P, 0.1f);
+PARAM_DEFINE_FLOAT(IBVS_IFY_P, 0.3f);
 
 /**
  * Gain for image around image z axis  in Body frame (Camera Frame)
@@ -73,7 +73,7 @@ PARAM_DEFINE_FLOAT(IBVS_IFY_P, 0.1f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_IFZ_P, 0.1f);
+PARAM_DEFINE_FLOAT(IBVS_IFZ_P, 0.3f);
 
 /**
  * Gain for velocity around image x axis in Body frame (Camera Frame)
@@ -85,7 +85,7 @@ PARAM_DEFINE_FLOAT(IBVS_IFZ_P, 0.1f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_VX_P, 0.1f);
+PARAM_DEFINE_FLOAT(IBVS_VX_P, 0.19f);
 
 /**
  * Gain for velocity around image yx axis in Body frame (Camera Frame)
@@ -97,7 +97,7 @@ PARAM_DEFINE_FLOAT(IBVS_VX_P, 0.1f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_VY_P,0.1f);
+PARAM_DEFINE_FLOAT(IBVS_VY_P,0.38f);
 
 /**
  * Gain for velocity around image z axis in Body frame (Camera Frame)
@@ -109,7 +109,7 @@ PARAM_DEFINE_FLOAT(IBVS_VY_P,0.1f);
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_VZ_P, 0.1f);
+PARAM_DEFINE_FLOAT(IBVS_VZ_P, 0.27f);
 
 /**
  * Gain for integral
@@ -233,85 +233,13 @@ PARAM_DEFINE_FLOAT(IBVS_IFZ_I_MAX, 0.035f);
 PARAM_DEFINE_FLOAT(IBVS_G, 0.3f);
 
 /**
- * Gain for controller input roll on v1
+ * Maximum allowed yaw angle
  *
  * @unit norm
  * @min 0
- * @max 5
+ * @max 1.57
  * @decimal 2
  * @increment 0.01
  * @group Multicopter IBVS Control
  */
-PARAM_DEFINE_FLOAT(IBVS_KL1_R, 0.8f);
-
-/**
- * Gain for controller input roll
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_KL2_R, 0.3f);
-
-/**
- * Gain for controller input pitch on v2
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_KL1_P, 0.8f);
-
-/**
- * Gain for controller input pitch
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_KL2_P, 0.15f);
-
-/**
- * Gain for controller input thrust
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_KH1, 1.1f);
-
-/**
- * Gain for controller input thrust
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_KH2, 0.3f);
-
-/**
- * Gain for controller input thrust
- *
- * @unit norm
- * @min 0
- * @max 5
- * @decimal 2
- * @increment 0.01
- * @group Multicopter IBVS Control
- */
-PARAM_DEFINE_FLOAT(IBVS_KPSI, 0.6f);
+PARAM_DEFINE_FLOAT(IBVS_YAW_MAX, 0.4f);

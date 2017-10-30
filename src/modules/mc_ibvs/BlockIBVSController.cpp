@@ -42,37 +42,24 @@ void BlockIBVSController::update()
 			float vx = _pos.get().vx*cosf(_pos.get().yaw)-_pos.get().vy*sinf(_pos.get().yaw);
 			float vy = _pos.get().vx*sinf(_pos.get().yaw)+_pos.get().vy*cosf(_pos.get().yaw);
                         float vz = _pos.get().vz;
-                        float fz = _kh2*(_img_moments.get().s[2]-1-(vz/_kh1));
 
-                        //Compute roll and check if saturation is necessary
-                        float phi_sp = _kl2_roll*(_img_moments.get().s[1]-vy/_kl1_roll);
-//                        if(phi_sp > _phi_max){
-//                            phi_sp = _phi_max;
-//                        } else if (phi_sp < -_phi_max){
-//                            phi_sp = -_phi_max;
-//                        }
-                        _att_sp.get().roll   = phi_sp;
+                        //Compute roll
+                        _att_sp.get().roll   = _piy.update(_img_moments.get().s[1])-_dy.update(vy);
 
-                        //Compute the pitch and saturate if necessary
-                        float theta_sp = -_kl2_pitch*(_img_moments.get().s[0]-vx/_kl1_pitch);
-//                        if(theta_sp > _theta_max){
-//                            theta_sp = _theta_max;
-//                        } else if (phi_sp < -_theta_max){
-//                            theta_sp = -_theta_max;
-//                        }
-                        _att_sp.get().pitch  = theta_sp;
+                        //Compute pitch
+                        _att_sp.get().pitch  = -_pix.update(_img_moments.get().s[0])+_dx.update(vx);
 
+                        //Compute yaw
                         float moment_s3 = _img_moments.get().s[3];
                         if( moment_s3 > _yaw_max){
                             moment_s3 = _yaw_max;
                         } else if (moment_s3 < -_yaw_max){
                             moment_s3 = -_yaw_max;
                         }
-                        float yaw_sp = _pos.get().yaw+(_kpsi)*moment_s3;
-                        _att_sp.get().yaw    = yaw_sp;
+                        _att_sp.get().yaw    = _pos.get().yaw+_pyaw.update(moment_s3);
 
                         //Thrust is 1 if at desired altitude + _thrust_g needed for hover
-                        _att_sp.get().thrust = _t_sat.update(-fz+_thrust_g);
+                        _att_sp.get().thrust = _t_sat.update(_dz.update(vz)-_piz.update(_img_moments.get().s[2]-1)+_thrust_g);
                         _att_sp.get().valid  = true;
 
                         }
