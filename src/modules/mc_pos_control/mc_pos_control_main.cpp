@@ -2358,6 +2358,11 @@ MulticopterPositionControl::task_main()
 				if (_params.mix_vision_pitch) _att_sp.pitch_body = _image_att_sp.pitch;
 				if (_params.mix_vision_yaw) _att_sp.yaw_body = _image_att_sp.yaw;
 				if (_params.mix_vision_thrust) _att_sp.thrust = _image_att_sp.thrust;
+                                //Assume data copied correctly then set the quaterion for att_control
+                                R = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body, _att_sp.yaw_body);
+                                /* copy quaternion setpoint to attitude setpoint topic */
+                                matrix::Quatf q_sp = R;
+                                memcpy(&_att_sp.q_d[0], q_sp.data(), sizeof(_att_sp.q_d));
 			}
 
 
