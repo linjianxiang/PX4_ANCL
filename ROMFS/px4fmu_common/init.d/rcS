@@ -556,6 +556,7 @@ then
 	if [ $MAVLINK_F == vicon ]
 	then
 		mavlink start -d /dev/ttyS1 -b 115200 -m vicon -r 115200
+		#mavlink start -d /dev/ttyS1 -b 57600 -m vicon -r 57600
 	else
 		if [ "x$MAVLINK_F" == xnone ]
 		then
@@ -709,9 +710,9 @@ then
 	#mavlink start -r 1200 -d /dev/ttyS1
 
 	# Start MAVLink on USB, developers can use the MAVLink shell
-	#mavlink start -r 60000 -d /dev/ttyACM0 -m config
+	mavlink start -r 60000 -d /dev/ttyACM0 -m config
 
-	nshterm /dev/ttyUSB0 & 
+	#nshterm /dev/ttyACM0 & 
 	#
 	# Logging
 	#

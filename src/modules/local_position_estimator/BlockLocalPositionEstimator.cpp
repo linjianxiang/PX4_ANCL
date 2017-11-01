@@ -747,6 +747,10 @@ void BlockLocalPositionEstimator::publishLocalPos()
 		_pub_lpos.get().v_z_valid = _validZ;
 		_pub_lpos.get().x = xLP(X_x); 	// north
 		_pub_lpos.get().y = xLP(X_y);  	// east
+		//PX4_INFO("position: x:%.4f y:%.4f ",
+		//(double)_pub_lpos.get().x ,
+		//(double)_pub_lpos.get().y);
+
 
 		if (_pub_agl_z.get()) {
 			_pub_lpos.get().z = -_aglLowPass.getState(); // agl
@@ -755,7 +759,7 @@ void BlockLocalPositionEstimator::publishLocalPos()
 			_pub_lpos.get().z = xLP(X_z); 	// down
 		}
 
-		_pub_lpos.get().vx = xLP(X_vx); // north
+		_pub_lpos.get().vx =  xLP(X_vx); // north
 		_pub_lpos.get().vy = xLP(X_vy); // east
 		_pub_lpos.get().vz = xLP(X_vz); // down
 

@@ -110,7 +110,7 @@ PARAM_DEFINE_FLOAT(LPE_LDR_OFF_Z, 0.00f);
  * @max 2
  * @decimal 4
  */
-PARAM_DEFINE_FLOAT(LPE_ACC_XY, 0.012f);
+PARAM_DEFINE_FLOAT(LPE_ACC_XY, 0.48f);
 
 /**
  * Accelerometer z noise density
@@ -123,7 +123,7 @@ PARAM_DEFINE_FLOAT(LPE_ACC_XY, 0.012f);
  * @max 2
  * @decimal 4
  */
-PARAM_DEFINE_FLOAT(LPE_ACC_Z, 0.02f);
+PARAM_DEFINE_FLOAT(LPE_ACC_Z, 0.8f);
 
 /**
  * Baro correction
@@ -150,7 +150,7 @@ PARAM_DEFINE_FLOAT(LPE_BAR_Z, 3.0f);
  * @group Local Position Estimator
  * @boolean
  */
-PARAM_DEFINE_INT32(LPE_GPS_ON, 1);
+PARAM_DEFINE_INT32(LPE_GPS_ON, 0);
 
 /**
  * GPS delay compensaton
@@ -270,7 +270,7 @@ PARAM_DEFINE_FLOAT(LPE_VIS_Z, 0.5f);
  * @group Local Position Estimator
  * @boolean
  */
-PARAM_DEFINE_INT32(LPE_VIS_ON, 1);
+PARAM_DEFINE_INT32(LPE_VIS_ON, 0);
 
 /**
  * Mocap correction
@@ -297,7 +297,7 @@ PARAM_DEFINE_FLOAT(LPE_VIC_P, 0.001f);
  * @group Local Position Estimator
  * @boolean
  */
-PARAM_DEFINE_INT32(LPE_VCN_ON, 0);
+PARAM_DEFINE_INT32(LPE_VCN_ON, 1);
 
 /**
  * Vicon position standard deviation.
@@ -308,7 +308,7 @@ PARAM_DEFINE_INT32(LPE_VCN_ON, 0);
  * @max 1
  * @decimal 4
  */
-PARAM_DEFINE_FLOAT(LPE_VCN_P, 0.01f);
+PARAM_DEFINE_FLOAT(LPE_VCN_P, 0.001f);
 
 /**
  * Vicon velocity standard deviation.
@@ -319,7 +319,7 @@ PARAM_DEFINE_FLOAT(LPE_VCN_P, 0.01f);
  * @max 1
  * @decimal 4
  */
-PARAM_DEFINE_FLOAT(LPE_VCN_V, 0.1f);
+PARAM_DEFINE_FLOAT(LPE_VCN_V, 0.01f);
 
 /**
  * Position propagation noise density
@@ -403,7 +403,7 @@ PARAM_DEFINE_FLOAT(LPE_FGYRO_HP, 0.001f);
  * @max 90
  * @decimal 8
  */
-PARAM_DEFINE_FLOAT(LPE_LAT, 40.430f);
+PARAM_DEFINE_FLOAT(LPE_LAT, 53.527f);
 
 /**
  * Local origin longitude for nav w/o GPS
@@ -414,7 +414,7 @@ PARAM_DEFINE_FLOAT(LPE_LAT, 40.430f);
  * @max 180
  * @decimal 8
  */
-PARAM_DEFINE_FLOAT(LPE_LON, -86.929);
+PARAM_DEFINE_FLOAT(LPE_LON, -113.53);
 
 /**
  * Cut frequency for state publication

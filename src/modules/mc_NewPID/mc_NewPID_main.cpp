@@ -51,7 +51,7 @@
 #include <math.h>
 
 #include "BlockNewPIDController.hpp"
-
+int INFO2();
 namespace NewPID
 {
 	static bool thread_should_exit = false;
@@ -94,6 +94,36 @@ usage(const char *reason)
  * The actual stack size should be set in the call
  * to task_create().
  */
+
+
+int INFO2()
+{
+	int sub = -1;
+	sub = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
+
+	if (sub>0) {
+		struct vehicle_image_attitude_setpoint_s data;
+		memset(&data,0,sizeof(data));
+		orb_copy(ORB_ID(vehicle_image_attitude_setpoint), sub, &data);
+		PX4_INFO("att_point: roll:%8.4f pitch:%8.4f yaw:%8.4f thrust:%8.4f",
+		(double)data.roll ,
+		(double)data.pitch,
+		(double)data.yaw,
+		(double)data.thrust);
+		
+		sub = orb_unsubscribe(sub);
+	} else {
+		PX4_INFO("Could not subscribe to vehicle_attitude_setpoint topic");
+		return 1;
+	}
+	return 0;
+
+
+
+
+return OK;
+}
+
 int mc_NewPID_main(int argc, char *argv[])
 {
 
@@ -128,7 +158,7 @@ int mc_NewPID_main(int argc, char *argv[])
 	if (!strcmp(argv[1], "status")) {
 		if (NewPID::thread_running) {
 			warnx("is running");
-
+			INFO2();
 		} else {
 			warnx("not started");
 		}

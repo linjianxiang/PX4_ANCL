@@ -2,11 +2,13 @@
 
 #include <px4_posix.h>
 #include <controllib/uorb/blocks.hpp>
-//#include <math.h>
+#include <math.h>
 #include <vector>
-
-
+#include <mathlib/mathlib.h>
+#include <lib/geo/geo.h>
 using namespace std;
+
+
 using namespace control;
 
 class BlockNewPIDController : public control::BlockNewPIDOuterLoop
@@ -18,19 +20,21 @@ public:
 		//_piy(this,"IFY"),
 		//_piz(this,"IFZ"),
 
+		_pposx(this,"POSX_P"),
+		_pposy(this,"POSY_P"),
+		_pposz(this,"POSZ_P"),
+
 		_pidx(this,"PID_X"),
 		_pidy(this,"PID_Y"),
 		_pidz(this,"PID_Z"),
 
-
-		_dx(this,"VX_P"),
-		_dy(this,"VY_P"),
-		_dz(this,"VZ_P"),
 		_pyaw(this,"YAW_P"),
-		_t_sat(this,"T"),
+
 		_fds(),
 		_t(0),
-		_pos_sp()
+		_pos_sp(),
+		_vel_sp()
+		
 	{
 		_fds[0].fd =_pos.getHandle();
 		
@@ -39,6 +43,14 @@ public:
 		_pos_sp.push_back(0);
 		_pos_sp.push_back(0);
 		_pos_sp.push_back(-1);
+
+
+
+		_vel_sp.push_back(0);
+		_vel_sp.push_back(0);
+		_vel_sp.push_back(0);
+
+		temp=0;
 
 		/*
 		_fds[0].fd = _img_moments.getHandle();
@@ -50,23 +62,35 @@ public:
 	void update();
 private:
 
+	BlockP _pposx; 
+	BlockP _pposy; 
+	BlockP _pposz; 
+
+
 	BlockPID _pidx;
 	BlockPID _pidy;
 	BlockPID _pidz;
 
+	//BlockPID _pidt;
 	//BlockPI _pix;
 	//BlockPI _piy;
 	//BlockPI _piz;
-	BlockP _dx;
-	BlockP _dy;
-	BlockP _dz;
+	//BlockP _dx;
+	//BlockP _dy;
+	//BlockP _dz;
 
 	BlockP _pyaw;
-	BlockLimit _t_sat;
+	//BlockLimit _t_sat;
 
 	px4_pollfd_struct_t _fds[1];
 	//px4_pollfd_struct_t _fds[3];
 	uint64_t _t;
 
+	
 	vector<float> _pos_sp;
+	vector<float> _vel_sp;
+
+
+	int temp;
+	
 };
