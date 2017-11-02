@@ -2027,6 +2027,7 @@ void MavlinkReceiver::handle_message_img_moments(mavlink_message_t *msg)
         struct img_moments_s img_moments_data;
         memset(&img_moments_data,0,sizeof(img_moments_data));
 
+        img_moments_data.timestamp=hrt_absolute_time();
         img_moments_data.usec=((uint32_t)img_moments.usec)*1000;
         img_moments_data.s[0]=(float)img_moments.s[0];
         img_moments_data.s[1]=(float)img_moments.s[1];
