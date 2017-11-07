@@ -111,6 +111,9 @@ int INFO2()
 		(double)data.yaw,
 		(double)data.thrust);
 		
+
+
+		
 		sub = orb_unsubscribe(sub);
 	} else {
 		PX4_INFO("Could not subscribe to vehicle_attitude_setpoint topic");
