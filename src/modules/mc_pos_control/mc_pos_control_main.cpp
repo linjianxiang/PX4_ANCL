@@ -100,9 +100,6 @@
  */
 extern "C" __EXPORT int mc_pos_control_main(int argc, char *argv[]);
 
-
-int	INFO();
-
 class MulticopterPositionControl : public control::SuperBlock
 {
 public:
@@ -122,8 +119,6 @@ public:
 	 * @return		OK on success.
 	 */
 	int		start();
-
-	
 
 	bool		cross_sphere_line(const math::Vector<3> &sphere_c, float sphere_r,
 					  const math::Vector<3> line_a, const math::Vector<3> line_b, math::Vector<3> &res);
@@ -1453,6 +1448,7 @@ MulticopterPositionControl::task_main()
 	_pos_sp_triplet_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
 	_local_pos_sp_sub = orb_subscribe(ORB_ID(vehicle_local_position_setpoint));
 	_global_vel_sp_sub = orb_subscribe(ORB_ID(vehicle_global_velocity_setpoint));
+        _image_att_sp_sub = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
 
 
 	parameters_update(true);
@@ -2342,7 +2338,7 @@ MulticopterPositionControl::task_main()
 		}
 
 		/* update previous velocity for velocity controller D part */
-		_vel_prev = _vel;
+                _vel_prev = _vel;
 
 		/* publish attitude setpoint
 		 * Do not publish if offboard is enabled but position/velocity/accel control is disabled,
@@ -2362,12 +2358,15 @@ MulticopterPositionControl::task_main()
 				if (_params.mix_vision_pitch) _att_sp.pitch_body = _image_att_sp.pitch;
 				if (_params.mix_vision_yaw) _att_sp.yaw_body = _image_att_sp.yaw;
 				if (_params.mix_vision_thrust) _att_sp.thrust = _image_att_sp.thrust;
+                                //Assume data copied correctly then set the quaterion for att_control
+                                matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body, _att_sp.yaw_body);
+                                /* copy quaternion setpoint to attitude setpoint topic */
+                                memcpy(&_att_sp.q_d[0], q_sp.data(), sizeof(_att_sp.q_d));
 			}
 
 
 			if (_att_sp_pub != nullptr) {
 				orb_publish(_attitude_setpoint_id, _att_sp_pub, &_att_sp);
-			
 
 			} else if (_attitude_setpoint_id) {
 				_att_sp_pub = orb_advertise(_attitude_setpoint_id, &_att_sp);
@@ -2404,32 +2403,6 @@ MulticopterPositionControl::start()
 
 	return OK;
 }
-
-int INFO()
-{
-	int sub = -1;
-	sub = orb_subscribe(ORB_ID(vehicle_attitude_setpoint));
-
-	if (sub>0) {
-		struct vehicle_attitude_setpoint_s data;
-		memset(&data,0,sizeof(data));
-		orb_copy(ORB_ID(vehicle_attitude_setpoint), sub, &data);
-		PX4_INFO("att_point: roll:%8.4f pitch:%8.4f yaw:%8.4f thrust:%8.4f",
-		(double)data.roll_body ,
-		(double)data.pitch_body,
-		(double)data.yaw_body,
-		(double)data.thrust);
-		
-		sub = orb_unsubscribe(sub);
-	} else {
-		PX4_INFO("Could not subscribe to vehicle_attitude_setpoint topic");
-		return 1;
-	}
-	return 0;
-
-}
-
-
 
 int mc_pos_control_main(int argc, char *argv[])
 {
@@ -2476,8 +2449,7 @@ int mc_pos_control_main(int argc, char *argv[])
 	if (!strcmp(argv[1], "status")) {
 		if (pos_control::g_control) {
 			warnx("running");
-			// yunzhi modified
-			return INFO();
+			return 0;
 
 		} else {
 			warnx("not running");
