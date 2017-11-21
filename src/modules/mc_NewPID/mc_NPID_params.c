@@ -50,7 +50,7 @@
  * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NPID_PID_X_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_X_P, 0.09f);
 
 /**
  * Gain for image around image y axis in Body frame (Camera Frame)
@@ -62,7 +62,7 @@ PARAM_DEFINE_FLOAT(NPID_PID_X_P, 0.1f);
  * @increment 0.01
  * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NPID_PID_Y_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_Y_P, 0.15f);
 
 /**
  * Gain for image around image z axis  in Body frame (Camera Frame)
@@ -71,14 +71,38 @@ PARAM_DEFINE_FLOAT(NPID_PID_Y_P, 0.1f);
  * @min 0
  * @max 5.0
  * @decimal 2
- * @increment 0.01
+ * @increment 0.001
  * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NPID_PID_Z_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_Z_P, 0.16f);
 
 
 /**
- * Gain for integral
+ * Integral gain for horizontal velocity error
+ *
+ * Non-zero value allows to resist wind.
+ *
+ * @min 0.0
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter NPID Control
+ */
+PARAM_DEFINE_FLOAT(NPID_PID_X_I, 0.02f);
+
+/**
+ * Integral gain for horizontal velocity error
+ *
+ * Non-zero value allows to resist wind.
+ *
+ * @min 0.0
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter NPID Control
+ */
+PARAM_DEFINE_FLOAT(NPID_PID_Y_I, 0.02f);
+
+/**
+ * Integral gain for vertical velocity error
  *
  * @unit norm
  * @min 0
@@ -87,31 +111,7 @@ PARAM_DEFINE_FLOAT(NPID_PID_Z_P, 0.1f);
  * @increment 0.01
  * @group Multicopter NPID Control
  */
-PARAM_DEFINE_FLOAT(NPID_PID_X_I, 0.0f);
-
-/**
- * Gain for integral
- *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
- * @group Multicopter NPID Control
- */
-PARAM_DEFINE_FLOAT(NPID_PID_Y_I, 0.0f);
-
-/**
- * Gain for integral
- *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
- * @group Multicopter NPID Control
- */
-PARAM_DEFINE_FLOAT(NPID_PID_Z_I, 0.0f);
+PARAM_DEFINE_FLOAT(NPID_PID_Z_I, 0.02f);
 
 /**
  * Gain for yaw
@@ -127,7 +127,7 @@ PARAM_DEFINE_FLOAT(NPID_YAW_P,0.6f);
 
 
 /**
- * s1 integral Saturation
+ * x integral Saturation
  *
  * @unit norm
  * @min 0
@@ -139,7 +139,7 @@ PARAM_DEFINE_FLOAT(NPID_YAW_P,0.6f);
 PARAM_DEFINE_FLOAT(NPID_PID_X_I_MAX, 0.035f);
 
 /**
- * s2 integral Saturation
+ * y integral Saturation
  *
  * @unit norm
  * @min 0
@@ -151,7 +151,7 @@ PARAM_DEFINE_FLOAT(NPID_PID_X_I_MAX, 0.035f);
 PARAM_DEFINE_FLOAT(NPID_PID_Y_I_MAX, 0.035f);
 
 /**
- * s3 integral Saturation
+ * z integral Saturation
  *
  * @unit norm
  * @min 0
@@ -163,78 +163,57 @@ PARAM_DEFINE_FLOAT(NPID_PID_Y_I_MAX, 0.035f);
 PARAM_DEFINE_FLOAT(NPID_PID_Z_I_MAX, 0.035f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Differential gain for horizontal velocity error. Small values help reduce fast oscillations. If value is too big oscillations will appear again.
  *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
+ * @min 0.001
+ * @max 0.1
+ * @decimal 3
  * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NPID_PID_X_D, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_X_D, 0.007f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Differential gain for horizontal velocity error. Small values help reduce fast oscillations. If value is too big oscillations will appear again.
  *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
+ * @min 0.005
+ * @max 0.1
+ * @decimal 3  
  * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NPID_PID_Y_D, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_Y_D, 0.01f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Differential gain for vertical velocity error
  *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
+ * @min 0.0
+ * @max 0.1
+ * @decimal 3
  * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NPID_PID_Z_D, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_PID_Z_D, 0f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Lowpass for x error derivative calculation
  *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
  * @group Multicopter NPID Control
  */
 
 PARAM_DEFINE_FLOAT(NPID_PID_X_D_LP, 0.1f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Lowpass for y error derivative calculation
  *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
  * @group Multicopter NPID Control
  */
 
 PARAM_DEFINE_FLOAT(NPID_PID_Y_D_LP, 0.1f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Lowpass for y error derivative calculation
  *
- * @unit norm
- * @min 0
- * @max 5.0
- * @decimal 2
- * @increment 0.01
  * @group Multicopter NPID Control
  */
 
@@ -245,33 +224,29 @@ PARAM_DEFINE_FLOAT(NPID_PID_Z_D_LP, 0.1f);
 
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Proportional gain for horizontal position error
  *
- * @unit norm
- * @min 0
- * @max 5.0
+ * @min 0.0
+ * @max 2.0
  * @decimal 2
- * @increment 0.01
  * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NPID_POSX_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_POSX_P, 0.95f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Proportional gain for horizontal position error
  *
- * @unit norm
- * @min 0
- * @max 5.0
+ * @min 0.0
+ * @max 2.0
  * @decimal 2
- * @increment 0.01
  * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NPID_POSY_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_POSY_P, 0.95f);
 
 /**
- * Gain for image around image x axis in Body frame (Camera Frame)
+ * Proportional gain for vertical position error
  *
  * @unit norm
  * @min 0
@@ -281,5 +256,5 @@ PARAM_DEFINE_FLOAT(NPID_POSY_P, 0.1f);
  * @group Multicopter NPID Control
  */
 
-PARAM_DEFINE_FLOAT(NPID_POSZ_P, 0.1f);
+PARAM_DEFINE_FLOAT(NPID_POSZ_P, 1.0f);
 

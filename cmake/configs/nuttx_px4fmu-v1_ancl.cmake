@@ -87,12 +87,17 @@ set(config_module_list
 	modules/mc_att_control
 	modules/mc_pos_control
 	modules/mc_ibvs
+
+	#modified at 11.20
+	modules/mc_NewPID
+	
+
 	#modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	#modules/sdlog2
+	modules/sdlog2
 	modules/logger
 
 	#

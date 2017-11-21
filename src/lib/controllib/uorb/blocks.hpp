@@ -58,6 +58,7 @@
 #include <uORB/topics/img_point.h>
 #include <uORB/topics/img_line.h>
 #include <uORB/topics/vehicle_image_attitude_setpoint.h>
+#include <uORB/topics/vicon.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,9 +158,11 @@ protected:
 		
 		//modified by yunzhi
 		//uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp_LIN;
-		
+		uORB::Subscription<vicon_s> _vicon;
         uORB::Subscription<vehicle_status_s> _status;
-        uORB::Subscription<parameter_update_s> _param_update;
+		uORB::Subscription<parameter_update_s> _param_update;
+		
+		
 
         uORB::Subscription<vehicle_local_position_s> _pos;
         //publications
