@@ -4,6 +4,10 @@
         "array": "cpp",
         "functional": "cpp",
         "tuple": "cpp",
-        "utility": "cpp"
-    }
+        "utility": "cpp",
+        "*.ipp": "cpp",
+        "system_error": "cpp",
+        "vector": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

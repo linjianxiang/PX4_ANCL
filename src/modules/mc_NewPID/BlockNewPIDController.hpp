@@ -34,7 +34,8 @@ public:
 		_t(0),
 		_pos_sp(),
 		_vel_sp()
-		
+		//_gravity(this,"G")
+		//_yawconst(this,"YAWCONST")
 	{
 		_fds[0].fd =_pos.getHandle();
 		
@@ -49,9 +50,13 @@ public:
 		_vel_sp.push_back(0);
 		_vel_sp.push_back(0);
 		_vel_sp.push_back(0);
-
-		temp=0;
-
+		
+		
+		_gravity_val=0.0;
+		_yaw_const_val=0.0;
+		
+		_gravity	= param_find("NPID_G");
+		_yaw_const	= param_find("NPID_YAW_CONST");
 		/*
 		_fds[0].fd = _img_moments.getHandle();
 		_fds[1].fd = _img_point.getHandle();
@@ -90,7 +95,8 @@ private:
 	vector<float> _pos_sp;
 	vector<float> _vel_sp;
 
-
-	int temp;
-	
+    param_t _gravity;
+	float _gravity_val;
+	param_t _yaw_const;
+	float _yaw_const_val;
 };

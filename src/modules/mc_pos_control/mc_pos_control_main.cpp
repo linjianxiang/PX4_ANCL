@@ -1988,19 +1988,19 @@ MulticopterPositionControl::task_main()
 						}
 
 						/* assume ground, cut thrust */
-						if (_in_landing
-						    && _vel_z_lp < 0.1f) {
-							thr_max = 0.0f;
-							_in_landing = false;
-							_lnd_reached_ground = true;
-						}
+						//if (_in_landing
+						//    && _vel_z_lp < 0.1f) {
+						//	thr_max = 0.0f;
+						//	_in_landing = false;
+						//	_lnd_reached_ground = true;
+						//}
 
 						/* once we assumed to have reached the ground always cut the thrust.
 							Only free fall detection below can revoke this
 						*/
-						if (!_in_landing && _lnd_reached_ground) {
-							thr_max = 0.0f;
-						}
+						//if (!_in_landing && _lnd_reached_ground) {
+						//	thr_max = 0.0f;
+						//}
 
 						/* if we suddenly fall, reset landing logic and remove thrust limit */
 						if (_lnd_reached_ground

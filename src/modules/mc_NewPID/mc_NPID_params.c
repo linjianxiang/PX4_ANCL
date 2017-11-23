@@ -258,3 +258,28 @@ PARAM_DEFINE_FLOAT(NPID_POSY_P, 0.95f);
 
 PARAM_DEFINE_FLOAT(NPID_POSZ_P, 1.0f);
 
+/**
+ * thrust required for gravity
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 3
+ * @increment 0.01
+ * @group Multicopter  NPID Control
+ */
+PARAM_DEFINE_FLOAT(NPID_G, 0.05f);
+
+/**
+ * yaw setpoint
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 3
+ * @group Multicopter  NPID Control
+ */
+PARAM_DEFINE_FLOAT(NPID_YAW_CONST, 0.0f);
+
+
+

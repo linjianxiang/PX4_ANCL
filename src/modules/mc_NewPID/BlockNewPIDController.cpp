@@ -16,7 +16,8 @@ void BlockNewPIDController::update()
 		uint64_t t1 = hrt_absolute_time();
 		float dt = (t1 - _t) / 1.0e6f;
 		_t=t1;
-
+		//Set message timestamp
+		_att_sp.get().timestamp = t1;
 		// check for sane values of dt
 		if (dt>1.0f || dt<0) {
 			warn("dt=%3.3f",(double)dt);
@@ -33,21 +34,59 @@ void BlockNewPIDController::update()
 
 			// get new information from subscriptions
 			updateSubscriptions();
-					
-			//Calculate Control
-			//convert velocity to body frame
+			param_get(_gravity, &_gravity_val);
+			param_get(_yaw_const, &_yaw_const_val);
+			//single pid on pos
+			/*
+				float x = _pos.get().x*cosf(Eta(2))+_pos.get().y*sinf(Eta(2));
+				float y = -_pos.get().x*sinf(Eta(2))+_pos.get().y*cosf(Eta(2));
+				float z = _pos.get().z;	
 
+				_att_sp.get().roll = _pidy.update(_pos_sp[1]-y);
+				_att_sp.get().pitch=-_pidx.update(_pos_sp[0]-x);
+				
+				_att_sp.get().yaw = Eta(2);
+				float temp_thrust = float(0.05)-float(0.8)*_pidz.update(_pos_sp[2]-z);
+				if(temp_thrust<0)
+					temp_thrust=0;
 
-			/* wait for declaration
-			math::Vector<3> _vel;
-			_vel.zero();
+				_att_sp.get().thrust=temp_thrust;
 			*/
+			
+			
+			//matrix::Eulerf Eta=matrix::Quatf((double)_vicon.get().q[0],(double)_vicon.get().q[1],(double)_vicon.get().q[2],(double)_vicon.get().q[3]);
+		
+			//PX4_INFO("Eta: (%2.3f,%2.3f,%2.3f)",(double)Eta(0),(double)Eta(1),(double)Eta(2));
+		
 
-			//math::Vector<3> vel_err = _vel_sp - _vel;
-			//thrust_sp = vel_err.emult(_params.vel_p) + _vel_err_d.emult(_params.vel_d) + thrust_int
+			
 
-			//_pos.get().vx
+			float x = _pos.get().x*cosf(_pos.get().yaw)+_pos.get().y*sinf(_pos.get().yaw);
+			float y = -_pos.get().x*sinf(_pos.get().yaw)+_pos.get().y*cosf(_pos.get().yaw);
+			float z = _pos.get().z;	
 
+			float vx = _pos.get().vx*cosf(_pos.get().yaw)+_pos.get().vy*sinf(_pos.get().yaw);
+			float vy = -_pos.get().vx*sinf(_pos.get().yaw)+_pos.get().vy*cosf(_pos.get().yaw);
+			float vz = _pos.get().vz;
+
+
+			_vel_sp[0]=_pposx.update(_pos_sp[0]-x);
+			_vel_sp[1]=_pposy.update(_pos_sp[1]-y);
+			_vel_sp[2]=_pposz.update(_pos_sp[2]-z);
+
+			_att_sp.get().roll = _pidy.update(_vel_sp[1]-vy);
+			_att_sp.get().pitch=-_pidx.update(_vel_sp[0]-vx);
+			
+			_att_sp.get().yaw = _yaw_const_val;
+			float temp_thrust = _gravity_val-_pidz.update(_vel_sp[2]-vz);
+			
+			if(temp_thrust<0)
+				temp_thrust=0;
+
+
+			_att_sp.get().thrust=temp_thrust;
+
+/*
 			_vel_sp[0]=_pposx.update(_pos_sp[0]-_pos.get().x);
 			_vel_sp[1]=_pposy.update(_pos_sp[1]-_pos.get().y);
 			_vel_sp[2]=_pposz.update(_pos_sp[2]-_pos.get().z);
@@ -65,8 +104,14 @@ void BlockNewPIDController::update()
 			math::Vector<3> body_y;
 			math::Vector<3> body_z;
 			body_z = -thrust_sp / thrust_abs;
-			math::Vector<3> y_C(-sinf(_pos.get().yaw), cosf(_pos.get().yaw), 0.0f);
+			math::Vector<3> y_C(-sinf(Eta(2)), cosf(Eta(2)), 0.0f);
 			body_x = y_C % body_z;
+			
+			if (body_z(2) < 0.0f) 
+			{
+						body_x = -body_x;
+			}
+			body_x.normalize();
 			body_y = body_z % body_x;
 
 			matrix::Dcmf R;
@@ -81,71 +126,20 @@ void BlockNewPIDController::update()
 			matrix::Eulerf euler = R;
 			_att_sp.get().roll = euler(0);
 			_att_sp.get().pitch = euler(1);
-			_att_sp.get().yaw = euler(2);
+			_att_sp.get().yaw =  Eta(2);
 			_att_sp.get().thrust =thrust_abs ;
-			/*
-			temp++;
-			if(temp==30)
-			{
-				PX4_INFO("Attitude Setpoint:  roll: %8.4f  pitch: %8.4f  yaw: %8.4f  thrust: %8.4f",
-				(double)_att_sp.get().roll,
-				(double)_att_sp.get().pitch,
-				(double)_att_sp.get().yaw,
-				(double)_att_sp.get().thrust);
-				PX4_INFO("Local Position:  x: %8.4f  y: %8.4f  z: %8.4f",
-				(double)_pos.get().x,
-				(double)_pos.get().y,
-				(double)_pos.get().z);
-				PX4_INFO("Local Position:  vx: %8.4f  vy: %8.4f  vz: %8.4f",
-				(double)_pos.get().vx,
-				(double)_pos.get().vy,
-				(double)_pos.get().vz);
-				temp=0;
-			}
-			_att_sp.get().valid = true;
+*/
 
-			
-
-			_att_sp.get().roll = _pidx.update(_vel_sp[0]-_pos.get().vx);
-			_att_sp.get().pitch = _pidy.update(_vel_sp[1]-_pos.get().vy);
-
-			_att_sp.get().yaw = _pos.get().yaw + _pyaw.update(_pos.get().yaw);
-
-			float thrust_abs = thrust_sp.length();
-
-
-
-
-			_att_sp.get().thrust = _pidz.update(_vel_sp[2]-_pos.get().vz);
-			
-			temp++;
-			if(temp==30)
-			{
-				PX4_INFO("Attitude Setpoint:  roll: %8.4f  pitch: %8.4f  yaw: %8.4f  thrust: %8.4f",
-				(double)_att_sp.get().roll,
-				(double)_att_sp.get().pitch,
-				(double)_att_sp.get().yaw,
-				(double)_att_sp.get().thrust);
-				PX4_INFO("Local Position:  x: %8.4f  y: %8.4f  z: %8.4f",
-				(double)_pos.get().x,
-				(double)_pos.get().y,
-				(double)_pos.get().z);
-				PX4_INFO("Local Position:  vx: %8.4f  vy: %8.4f  vz: %8.4f",
-				(double)_pos.get().vx,
-				(double)_pos.get().vy,
-				(double)_pos.get().vz);
-				temp=0;
-			}*/
 
 			/*
-			float vx = _pos.get().vx*cosf(_pos.get().yaw)-_pos.get().vy*sinf(_pos.get().yaw);
-			float vy = _pos.get().vx*sinf(_pos.get().yaw)+_pos.get().vy*cosf(_pos.get().yaw);
+			float vx = _pos.get().vx*cosf(Eta(2))-_pos.get().vy*sinf(_pos.get().yaw);
+			float vy = _pos.get().vx*sinf(Eta(2))+_pos.get().vy*cosf(Eta(2));
 			float vz = _pos.get().vz;			 
 
 			_att_sp.get().roll = _pix.update(_img_moments.get().s[0])-_dx.update(vx);
 			_att_sp.get().pitch = _piy.update(_img_moments.get().s[1])-_dy.update(vy);
 
-			_att_sp.get().yaw = _pos.get().yaw + _pyaw.update(_pos.get().yaw);
+			_att_sp.get().yaw = Eta(2) + _pyaw.update(Eta(2));
 
 			_att_sp.get().thrust = _t_sat.update(_piz.update(_img_moments.get().s[2]-1)-_dz.update(vz));
 			_att_sp.get().valid = true;*/
