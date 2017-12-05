@@ -59,8 +59,8 @@ void BlockNewPIDController::update()
 			//PX4_INFO("Eta: (%2.3f,%2.3f,%2.3f)",(double)Eta(0),(double)Eta(1),(double)Eta(2));
 		
 
+			//New_PID
 			
-
 			float x = _pos.get().x*cosf(_pos.get().yaw)+_pos.get().y*sinf(_pos.get().yaw);
 			float y = -_pos.get().x*sinf(_pos.get().yaw)+_pos.get().y*cosf(_pos.get().yaw);
 			float z = _pos.get().z;	
@@ -80,11 +80,42 @@ void BlockNewPIDController::update()
 			_att_sp.get().yaw = _yaw_const_val;
 			float temp_thrust = _gravity_val-_pidz.update(_vel_sp[2]-vz);
 			
-			if(temp_thrust<0)
-				temp_thrust=0;
+			 if(temp_thrust<0)
+			 	temp_thrust=0;
 
 
-			_att_sp.get().thrust=temp_thrust;
+			 _att_sp.get().thrust=temp_thrust;
+			
+
+            /*
+			//math::Vector<3> e3(0,0,1);
+			float g=9.8;
+			float m=1.6;
+
+
+			//float psi=_pos.get().yaw;
+
+			//math::Matrix<3, 3> R3psi(cosf(psi),-sinf(psi),0;cosf(psi),-sinf(psi),0)
+			
+	
+			_pos_sp[0]=_pos_sp[0]-_pos.get().x;
+			_pos_sp[1]=_pos_sp[1]-_pos.get().y;
+			_pos_sp[2]=_pos_sp[2]-_pos.get().z;
+
+		
+			_vel_sp[0]=_pidx.update(_pos_sp[0]);
+			_vel_sp[1]=_pidy.update(_pos_sp[1]);
+			_vel_sp[2]=-m*g+_pidz.update(_pos_sp[2]);
+
+			_att_sp.get().roll=-(_vel_sp[0]*cosf(_pos.get().yaw)+_vel_sp[1]*sinf(_pos.get().yaw))/m/g;
+			_att_sp.get().pitch=(-_vel_sp[0]*sinf(_pos.get().yaw)+_vel_sp[1]*cosf(_pos.get().yaw))/m/g;
+			
+			_att_sp.get().yaw = _yaw_const_val;
+			
+			_att_sp.get().thrust=-_vel_sp[2];*/
+			
+
+
 
 /*
 			_vel_sp[0]=_pposx.update(_pos_sp[0]-_pos.get().x);

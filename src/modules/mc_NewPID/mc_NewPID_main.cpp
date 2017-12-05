@@ -34,7 +34,7 @@
 
 /**
  * @file mc_NewPID_main.cpp
- * Multicopter Image Based Visual Servoing controller.
+ * Multicopter NewPID controller.
  *
  */
 
