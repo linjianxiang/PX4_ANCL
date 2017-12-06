@@ -90,7 +90,9 @@ set(config_module_list
 
 	#modified at 11.20
 	modules/mc_NewPID
-	
+
+	#modified at 12.5
+	modules/mc_IN
 
 	#modules/vtol_att_control
 
