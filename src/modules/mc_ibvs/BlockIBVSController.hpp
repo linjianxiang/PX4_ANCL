@@ -5,11 +5,11 @@
 
 using namespace control;
 
-class BlockIBVSController : public control::BlockIBVSOuterLoop
+class BlockIBVSController : public control::BlockANCLOuterLoop
 {
 public:
 	BlockIBVSController() :
-		BlockIBVSOuterLoop(NULL,"IBVS"),
+		BlockANCLOuterLoop(NULL,"IBVS"),
 		_pix(this,"IFX"),
 		_piy(this,"IFY"),
 		_piz(this,"IFZ"),

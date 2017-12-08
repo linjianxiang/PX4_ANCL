@@ -562,7 +562,8 @@ void Logger::add_default_topics()
 
 	//ancl
 	add_topic("vicon");
-	add_topic("vehicle_image_attitude_setpoint");
+	add_topic("vehicle_secondary_attitude_setpoint");
+	add_topic("vehicle_secondary_control_setpoint");
 	add_topic("img_line");
 	add_topic("img_moments");
 	add_topic("img_point");

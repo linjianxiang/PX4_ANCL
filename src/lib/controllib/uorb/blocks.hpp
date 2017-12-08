@@ -52,7 +52,8 @@
 #include <uORB/topics/img_moments.h>
 #include <uORB/topics/img_point.h>
 #include <uORB/topics/img_line.h>
-#include <uORB/topics/vehicle_image_attitude_setpoint.h>
+#include <uORB/topics/vehicle_secondary_attitude_setpoint.h>
+#include <uORB/topics/vehicle_secondary_control_setpoint.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,10 +112,10 @@ public:
 };
 
 /**
- * ANCL IBVS Outer Loop with uORB
+ * ANCL Outer Loop with uORB
  */
 
-class __EXPORT BlockIBVSOuterLoop : public SuperBlock
+class __EXPORT BlockANCLOuterLoop : public SuperBlock
 {
 protected:
 	//subscriptions
@@ -126,11 +127,55 @@ protected:
 	uORB::Subscription<parameter_update_s> _param_update;
 	uORB::Subscription<vehicle_local_position_s> _pos;
 	//publications
-	uORB::Publication<vehicle_image_attitude_setpoint_s> _att_sp;
+	uORB::Publication<vehicle_secondary_attitude_setpoint_s> _att_sp;
 public:
-	BlockIBVSOuterLoop(SuperBlock *parent, const char *name);
-	virtual ~BlockIBVSOuterLoop();
+	BlockANCLOuterLoop(SuperBlock *parent, const char *name);
+	virtual ~BlockANCLOuterLoop();
 };
+
+/**
+ * ANCL Inner Loop with uORB
+ */
+
+class __EXPORT BlockANCLInnerLoop : public SuperBlock
+{
+protected:
+	//subscriptions
+	uORB::Subscription<vehicle_attitude_s> _att;
+	uORB::Subscription<vehicle_attitude_setpoint_s> _attCmd;
+	uORB::Subscription<vehicle_secondary_attitude_setpoint_s> _att2Cmd;
+	uORB::Subscription<vehicle_status_s> _status;
+	uORB::Subscription<parameter_update_s> _param_update;
+	//publications
+	uORB::Publication<vehicle_secondary_control_setpoint_s> _control_sp;
+public:
+	BlockANCLInnerLoop(SuperBlock *parent, const char *name);
+	virtual ~BlockANCLInnerLoop();
+};
+
+/**
+ * ANCL Single Loop with uORB
+ */
+
+class __EXPORT BlockANCLLoop : public SuperBlock
+{
+protected:
+	//subscriptions
+	uORB::Subscription<img_moments_s> _img_moments;
+	uORB::Subscription<img_point_s> _img_point;
+	uORB::Subscription<img_line_s> _img_line;
+	uORB::Subscription<vehicle_status_s> _status;
+	uORB::Subscription<parameter_update_s> _param_update;
+	uORB::Subscription<vehicle_local_position_s> _pos;
+	uORB::Subscription<vehicle_attitude_s> _att;
+	//publications
+	uORB::Publication<vehicle_secondary_attitude_setpoint_s> _att_sp;
+	uORB::Publication<vehicle_secondary_control_setpoint_s> _control_sp;
+public:
+	BlockANCLLoop(SuperBlock *parent, const char *name);
+	virtual ~BlockANCLLoop();
+};
+
 
 } // namespace control
 

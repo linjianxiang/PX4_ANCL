@@ -76,7 +76,7 @@
 #include <uORB/topics/vehicle_global_velocity_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/vehicle_land_detected.h>
-#include <uORB/topics/vehicle_image_attitude_setpoint.h>
+#include <uORB/topics/vehicle_secondary_attitude_setpoint.h>
 
 #include <systemlib/systemlib.h>
 #include <systemlib/mavlink_log.h>
@@ -140,7 +140,7 @@ private:
 	int		_pos_sp_triplet_sub;		/**< position setpoint triplet */
 	int		_local_pos_sp_sub;		/**< offboard local position setpoint */
 	int		_global_vel_sp_sub;		/**< offboard global velocity setpoint */
-	int		_image_att_sp_sub;
+	int		_secondary_att_sp_sub;
 
 	orb_advert_t	_att_sp_pub;			/**< attitude setpoint publication */
 	orb_advert_t	_local_pos_sp_pub;		/**< vehicle local position setpoint publication */
@@ -159,7 +159,7 @@ private:
 	struct position_setpoint_triplet_s		_pos_sp_triplet;	/**< vehicle global position setpoint triplet */
 	struct vehicle_local_position_setpoint_s	_local_pos_sp;		/**< vehicle local position setpoint */
 	struct vehicle_global_velocity_setpoint_s	_global_vel_sp;		/**< vehicle global velocity setpoint */
-	struct vehicle_image_attitude_setpoint_s	_image_att_sp;
+	struct vehicle_secondary_attitude_setpoint_s	_secondary_att_sp;
 
 	control::BlockParamFloat _manual_thr_min;
 	control::BlockParamFloat _manual_thr_max;
@@ -270,7 +270,7 @@ private:
 	bool _run_pos_control;
 	bool _run_alt_control;
 	
-	bool _image_att_sp_valid;
+	bool _secondary_att_sp_valid;
 
 	math::Vector<3> _pos;
 	math::Vector<3> _pos_sp;
@@ -402,7 +402,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_local_pos_sub(-1),
 	_pos_sp_triplet_sub(-1),
 	_global_vel_sp_sub(-1),
-	_image_att_sp_sub(-1),
+	_secondary_att_sp_sub(-1),
 
 	/* publications */
 	_att_sp_pub(nullptr),
@@ -438,7 +438,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_alt_hold_engaged(false),
 	_run_pos_control(true),
 	_run_alt_control(true),
-	_image_att_sp_valid(false),
+	_secondary_att_sp_valid(false),
 	_yaw(0.0f),
 	_in_landing(false),
 	_lnd_reached_ground(false),
@@ -816,11 +816,11 @@ MulticopterPositionControl::poll_subscriptions()
 		_vxy_reset_counter = _local_pos.vxy_reset_counter;
 	}
 
-	orb_check(_image_att_sp_sub,&updated);
+	orb_check(_secondary_att_sp_sub,&updated);
 	
 	if (updated) {
-		orb_copy(ORB_ID(vehicle_image_attitude_setpoint), _image_att_sp_sub, &_image_att_sp);
-		_image_att_sp_valid = _image_att_sp.valid;
+		orb_copy(ORB_ID(vehicle_secondary_attitude_setpoint), _secondary_att_sp_sub, &_secondary_att_sp);
+		_secondary_att_sp_valid = _secondary_att_sp.valid;
 
 	}
 }
@@ -1448,7 +1448,7 @@ MulticopterPositionControl::task_main()
 	_pos_sp_triplet_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
 	_local_pos_sp_sub = orb_subscribe(ORB_ID(vehicle_local_position_setpoint));
 	_global_vel_sp_sub = orb_subscribe(ORB_ID(vehicle_global_velocity_setpoint));
-        _image_att_sp_sub = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
+        _secondary_att_sp_sub = orb_subscribe(ORB_ID(vehicle_secondary_attitude_setpoint));
 
 
 	parameters_update(true);
@@ -2353,11 +2353,11 @@ MulticopterPositionControl::task_main()
 
 
 			//TODO
-			if (_image_att_sp_valid && _mode_ancl2 && _params.use_vision ) {
-				if (_params.mix_vision_roll) _att_sp.roll_body = _image_att_sp.roll;
-				if (_params.mix_vision_pitch) _att_sp.pitch_body = _image_att_sp.pitch;
-				if (_params.mix_vision_yaw) _att_sp.yaw_body = _image_att_sp.yaw;
-				if (_params.mix_vision_thrust) _att_sp.thrust = _image_att_sp.thrust;
+			if (_secondary_att_sp_valid && _mode_ancl2 && _params.use_vision ) {
+				if (_params.mix_vision_roll) _att_sp.roll_body = _secondary_att_sp.roll;
+				if (_params.mix_vision_pitch) _att_sp.pitch_body = _secondary_att_sp.pitch;
+				if (_params.mix_vision_yaw) _att_sp.yaw_body = _secondary_att_sp.yaw;
+				if (_params.mix_vision_thrust) _att_sp.thrust = _secondary_att_sp.thrust;
                                 //Assume data copied correctly then set the quaterion for att_control
                                 matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body, _att_sp.yaw_body);
                                 /* copy quaternion setpoint to attitude setpoint topic */

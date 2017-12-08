@@ -55,7 +55,7 @@
 #include <arch/board/board.h>
 #include <errno.h>
 #include <uORB/topics/img_moments.h>
-#include <uORB/topics/vehicle_image_attitude_setpoint.h>
+#include <uORB/topics/vehicle_secondary_attitude_setpoint.h>
 #include <math.h>
 #include <systemlib/scheduling_priorities.h>
 
@@ -164,7 +164,7 @@ int img_moments_main(int argc, char *argv[])
 {
         int sub=-1;
         struct img_moments_s data;
-        struct vehicle_image_attitude_setpoint_s img_sp;
+        struct vehicle_secondary_attitude_setpoint_s img_sp;
         memset(&data,0,sizeof(data));
 
         if (argc < 2) {
@@ -225,10 +225,10 @@ int img_moments_main(int argc, char *argv[])
 	}
 
         if (!strcmp(argv[1], "ibvs")) {
-                sub = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
+                sub = orb_subscribe(ORB_ID(vehicle_secondary_attitude_setpoint));
                 if (sub>0) {
                         PX4_INFO("Image moments:");
-                        orb_copy(ORB_ID(vehicle_image_attitude_setpoint), sub, &img_sp);
+                        orb_copy(ORB_ID(vehicle_secondary_attitude_setpoint), sub, &img_sp);
                         PX4_INFO("Timestamp: (%" PRIu64 ")",img_sp.timestamp);
                         PX4_INFO("Roll: (%.5f)",(double)img_sp.roll);
                         PX4_INFO("Pitch: (%.5f)",(double)img_sp.pitch);
@@ -241,7 +241,7 @@ int img_moments_main(int argc, char *argv[])
                         }
 
                 } else {
-                        PX4_INFO("Could not subscribe to vehicle_image_attitude_setpoint topic");
+                        PX4_INFO("Could not subscribe to vehicle_secondary_attitude_setpoint topic");
                 }
                 sub = orb_unsubscribe(sub);
                 return 0;

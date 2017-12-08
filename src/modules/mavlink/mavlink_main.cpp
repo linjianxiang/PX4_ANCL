@@ -1995,7 +1995,8 @@ Mavlink::task_main(int argc, char *argv[])
 		configure_stream("VFR_HUD", 4.0f);
 		configure_stream("WIND_COV", 1.0f);
 		configure_stream("VICON",20.0f);
-		configure_stream("IMAGE_ATTITUDE_TARGET", 2.0f);
+		configure_stream("SECONDARY_ATTITUDE_TARGET",2.0f);
+		configure_stream("SECONDARY_CONTROL_TARGET",2.0f);
 		break;
 
 	case MAVLINK_MODE_ONBOARD:
@@ -2030,7 +2031,8 @@ Mavlink::task_main(int argc, char *argv[])
 		configure_stream("CAMERA_TRIGGER", 500.0f);
 		configure_stream("ACTUATOR_CONTROL_TARGET0", 10.0f);
 		configure_stream("VICON",100.0f);
-		configure_stream("IMAGE_ATTITUDE_TARGET",50.0f);
+		configure_stream("SECONDARY_ATTITUDE_TARGET",50.0f);
+		configure_stream("SECONDARY_CONTROL_TARGET",50.0f);
 		break;
 
 	case MAVLINK_MODE_OSD:
@@ -2085,7 +2087,8 @@ Mavlink::task_main(int argc, char *argv[])
 		configure_stream("ACTUATOR_CONTROL_TARGET0", 30.0f);
 		configure_stream("MANUAL_CONTROL", 5.0f);
 		configure_stream("VICON",50.0f);
-		configure_stream("IMAGE_ATTITUDE_TARGET",50.0f);
+		configure_stream("SECONDARY_ATTITUDE_TARGET",50.0f);
+		configure_stream("SECONDARY_CONTROL_TARGET",50.0f);
 	case MAVLINK_MODE_VICON:
 		//stream nothing
 		//maybe add heartbeat?

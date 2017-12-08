@@ -40,6 +40,12 @@ mc_att_control start
 
 mc_pos_control start
 
+if param compare MPC_VIS_ON 0
+then
+else
+	mc_ibvs start
+fi
+
 #
 # Start Land Detector
 #

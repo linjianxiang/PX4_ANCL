@@ -96,7 +96,8 @@
 #include <uORB/topics/img_moments.h>
 #include <uORB/topics/img_point.h>
 #include <uORB/topics/img_line.h>
-#include <uORB/topics/vehicle_image_attitude_setpoint.h>
+#include <uORB/topics/vehicle_secondary_attitude_setpoint.h>
+#include <uORB/topics/vehicle_secondary_control_setpoint.h>
 
 static uint16_t cm_uint16_from_m_float(float m);
 static void get_mavlink_mode_state(struct vehicle_status_s *status, uint8_t *mavlink_state,
@@ -3888,23 +3889,22 @@ protected:
         }
 };
 
-class MavlinkStreamImageAttitudeTarget : public MavlinkStream
+class MavlinkStreamSecondaryAttitudeTarget : public MavlinkStream
 {
 public:
 	const char *get_name() const
 	{
-		return MavlinkStreamImageAttitudeTarget::get_name_static();
+		return MavlinkStreamSecondaryAttitudeTarget::get_name_static();
 	}
 
 	static const char *get_name_static()
 	{
-		return "IMAGE_ATTITUDE_TARGET";
+		return "SECONDARY_ATTITUDE_TARGET";
 	}
 
 	static uint16_t get_id_static()
 	{
-		//TODO
-		return MAVLINK_MSG_ID_ATTITUDE_TARGET;
+		return MAVLINK_MSG_ID_ATTITUDE_TARGET2;
 	}
 
 	uint16_t get_id()
@@ -3914,13 +3914,12 @@ public:
 
 	static MavlinkStream *new_instance(Mavlink *mavlink)
 	{
-		return new MavlinkStreamImageAttitudeTarget(mavlink);
+		return new MavlinkStreamSecondaryAttitudeTarget(mavlink);
 	}
 
 	unsigned get_size()
 	{
-		//TODO
-		return MAVLINK_MSG_ID_ATTITUDE_TARGET_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+		return MAVLINK_MSG_ID_ATTITUDE_TARGET2_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
 	}
 
 private:
@@ -3928,30 +3927,100 @@ private:
 	uint64_t _att_sp_time;
 
 	/* do not allow top copying this class */
-	MavlinkStreamImageAttitudeTarget(MavlinkStreamImageAttitudeTarget &);
-	MavlinkStreamImageAttitudeTarget &operator = (const MavlinkStreamImageAttitudeTarget &);
+	MavlinkStreamSecondaryAttitudeTarget(MavlinkStreamSecondaryAttitudeTarget &);
+	MavlinkStreamSecondaryAttitudeTarget &operator = (const MavlinkStreamSecondaryAttitudeTarget &);
 
 protected:
-	explicit MavlinkStreamImageAttitudeTarget(Mavlink *mavlink) : MavlinkStream(mavlink),
-		_att_sp_sub(_mavlink->add_orb_subscription(ORB_ID(vehicle_image_attitude_setpoint))),
+	explicit MavlinkStreamSecondaryAttitudeTarget(Mavlink *mavlink) : MavlinkStream(mavlink),
+		_att_sp_sub(_mavlink->add_orb_subscription(ORB_ID(vehicle_secondary_attitude_setpoint))),
 		_att_sp_time(0)
 	{}
 
 	void send(const hrt_abstime t)
 	{
-		struct vehicle_image_attitude_setpoint_s att_sp;
+		struct vehicle_secondary_attitude_setpoint_s att_sp;
 
 		if (_att_sp_sub->update(&_att_sp_time, &att_sp)) {
 
-			mavlink_attitude_target_t msg{};
+			mavlink_attitude_target2_t msg{};
 
 			msg.time_boot_ms = att_sp.timestamp / 1000;
 			//TODO
 			mavlink_euler_to_quaternion(att_sp.roll, att_sp.pitch, att_sp.yaw, msg.q);
-
+			msg.roll = att_sp.roll;
+			msg.pitch = att_sp.pitch;
+			msg.yaw = att_sp.yaw;
+	
 			msg.thrust = att_sp.thrust;
 
-			mavlink_msg_attitude_target_send_struct(_mavlink->get_channel(), &msg);
+			mavlink_msg_attitude_target2_send_struct(_mavlink->get_channel(), &msg);
+		}
+	}
+};
+
+class MavlinkStreamSecondaryControlTarget : public MavlinkStream
+{
+public:
+	const char *get_name() const
+	{
+		return MavlinkStreamSecondaryControlTarget::get_name_static();
+	}
+
+	static const char *get_name_static()
+	{
+		return "SECONDARY_CONTROL_TARGET";
+	}
+
+	static uint16_t get_id_static()
+	{
+		//TODO
+		return MAVLINK_MSG_ID_ACTUATOR_CONTROL_TARGET2;
+	}
+
+	uint16_t get_id()
+	{
+		return get_id_static();
+	}
+
+	static MavlinkStream *new_instance(Mavlink *mavlink)
+	{
+		return new MavlinkStreamSecondaryControlTarget(mavlink);
+	}
+
+	unsigned get_size()
+	{
+		//TODO
+		return MAVLINK_MSG_ID_ACTUATOR_CONTROL_TARGET2_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+	}
+
+private:
+	MavlinkOrbSubscription *_control_sp_sub;
+	uint64_t _control_sp_time;
+
+	/* do not allow top copying this class */
+	MavlinkStreamSecondaryControlTarget(MavlinkStreamSecondaryControlTarget &);
+	MavlinkStreamSecondaryControlTarget &operator = (const MavlinkStreamSecondaryControlTarget &);
+
+protected:
+	explicit MavlinkStreamSecondaryControlTarget(Mavlink *mavlink) : MavlinkStream(mavlink),
+		_control_sp_sub(_mavlink->add_orb_subscription(ORB_ID(vehicle_secondary_control_setpoint))),
+		_control_sp_time(0)
+	{}
+
+	void send(const hrt_abstime t)
+	{
+		struct vehicle_secondary_control_setpoint_s control_sp;
+
+		if (_control_sp_sub->update(&_control_sp_time, &control_sp)) {
+
+			mavlink_actuator_control_target2_t msg{};
+
+			msg.time_usec = control_sp.timestamp_sample / 1000;
+
+			for (int i=0;i<4;i++)
+				msg.controls[0] = control_sp.control[i];
+
+			mavlink_msg_actuator_control_target2_send_struct(_mavlink->get_channel(), &msg);
 		}
 	}
 };
@@ -4007,6 +4076,7 @@ const StreamListItem *streams_list[] = {
         new StreamListItem(&MavlinkStreamImgMoments::new_instance,&MavlinkStreamImgMoments::get_name_static,&MavlinkStreamImgMoments::get_id_static),
 	new StreamListItem(&MavlinkStreamImgPoint::new_instance,&MavlinkStreamImgPoint::get_name_static,&MavlinkStreamImgPoint::get_id_static),
 	new StreamListItem(&MavlinkStreamImgLine::new_instance,&MavlinkStreamImgLine::get_name_static,&MavlinkStreamImgLine::get_id_static),
-	new StreamListItem(&MavlinkStreamImageAttitudeTarget::new_instance,&MavlinkStreamImageAttitudeTarget::get_name_static,&MavlinkStreamImageAttitudeTarget::get_id_static),
+	new StreamListItem(&MavlinkStreamSecondaryAttitudeTarget::new_instance,&MavlinkStreamSecondaryAttitudeTarget::get_name_static,&MavlinkStreamSecondaryAttitudeTarget::get_id_static),
+	new StreamListItem(&MavlinkStreamSecondaryControlTarget::new_instance,&MavlinkStreamSecondaryControlTarget::get_name_static,&MavlinkStreamSecondaryControlTarget::get_id_static),
 	nullptr
 };

@@ -128,12 +128,12 @@ int mc_ibvs_main(int argc, char *argv[])
 	if (!strcmp(argv[1], "status")) {
 		if (ibvs::thread_running) {
                         struct img_moments_s data;
-                        struct vehicle_image_attitude_setpoint_s img_sp;
+                        struct vehicle_secondary_attitude_setpoint_s img_sp;
                         int sub=-1;
                         int sub1=-1;
                         warnx("mc_ibvs is running");
                         sub = orb_subscribe(ORB_ID(img_moments));
-                        sub1 = orb_subscribe(ORB_ID(vehicle_image_attitude_setpoint));
+                        sub1 = orb_subscribe(ORB_ID(vehicle_secondary_attitude_setpoint));
                         if(sub>0){
                             PX4_INFO("IMAGE MOMENTS RECEIVED");
                             orb_copy(ORB_ID(img_moments), sub, &data);
@@ -149,7 +149,7 @@ int mc_ibvs_main(int argc, char *argv[])
                         sub = orb_unsubscribe(sub);
                         if (sub1>0) {
                             PX4_INFO("MC_IBVS OUTPUT");
-                            orb_copy(ORB_ID(vehicle_image_attitude_setpoint), sub1, &img_sp);
+                            orb_copy(ORB_ID(vehicle_secondary_attitude_setpoint), sub1, &img_sp);
                             PX4_INFO("Timestamp: (%" PRIu64 ")",img_sp.timestamp);
                             PX4_INFO("Roll: (%.5f)",(double)img_sp.roll);
                             PX4_INFO("Pitch: (%.5f)",(double)img_sp.pitch);
@@ -161,7 +161,7 @@ int mc_ibvs_main(int argc, char *argv[])
                                 PX4_INFO("Valid: FALSE");
                             }
                         } else {
-                                PX4_INFO("Could not subscribe to vehicle_image_attitude_setpoint topic");
+                                PX4_INFO("Could not subscribe to vehicle_secondary_attitude_setpoint topic");
                         }
                         sub1 = orb_unsubscribe(sub1);
 
