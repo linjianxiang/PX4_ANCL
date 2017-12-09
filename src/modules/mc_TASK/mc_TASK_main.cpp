@@ -33,8 +33,8 @@
  ****************************************************************************/
 
 /**
- * @file mc_IN_main.cpp
- * Multicopter IN controller.
+ * @file mc_TASK_main.cpp
+ * Multicopter TASK controller.
  *
  */
 
@@ -50,25 +50,26 @@
 #include <drivers/drv_hrt.h>
 #include <math.h>
 
-#include "BlockINController.hpp"
-int INFO3();
-namespace IN
+#include "BlockTASKController.hpp"
+
+int INFO5();
+namespace TASK
 {
 	static bool thread_should_exit = false;
 	static bool thread_running = false;
 	static int deamon_task;
-	static BlockINController *control;
+	static BlockTASKController *control;
 }
 
 /**
  * Deamon management function.
  */
-extern "C" __EXPORT int mc_IN_main(int argc, char *argv[]);
+extern "C" __EXPORT int mc_TASK_main(int argc, char *argv[]);
 
 /**
  * Mainloop of deamon.
  */
-int mc_IN_thread_main(int argc, char *argv[]);
+int mc_TASK_thread_main(int argc, char *argv[]);
 
 /**
  * Print the correct usage.
@@ -82,7 +83,7 @@ usage(const char *reason)
 		fprintf(stderr, "%s\n", reason);
 	}
 
-	fprintf(stderr, "usage: mc_IN {start|stop|status} [-p <additional params>]\n\n");
+	fprintf(stderr, "usage: mc_TASK {start|stop|status} [-p <additional params>]\n\n");
 	exit(1);
 }
 
@@ -96,7 +97,7 @@ usage(const char *reason)
  */
 
 
-int INFO3()
+int INFO5()
 {
 	int sub = -1;
 	sub = orb_subscribe(ORB_ID(actuator_controls));
@@ -123,11 +124,10 @@ int INFO3()
 
 
 
-
 return OK;
 }
 
-int mc_IN_main(int argc, char *argv[])
+int mc_TASK_main(int argc, char *argv[])
 {
 
 	if (argc < 2) {
@@ -136,32 +136,32 @@ int mc_IN_main(int argc, char *argv[])
 
 	if (!strcmp(argv[1], "start")) {
 
-		if (IN::thread_running) {
+		if (TASK::thread_running) {
 			warnx("already running");
 			/* this is not an error */
 			exit(0);
 		}
 
-		IN::thread_should_exit = false;
+		TASK::thread_should_exit = false;
 
-		IN::deamon_task = px4_task_spawn_cmd("mc_IN",
+		TASK::deamon_task = px4_task_spawn_cmd("mc_TASK",
 						 SCHED_DEFAULT,
 						 SCHED_PRIORITY_POSITION_CONTROL,
 						 4048,
-						 mc_IN_thread_main,
+						 mc_TASK_thread_main,
 						 (argv) ? (char *const *)&argv[2] : (char *const *)NULL);
 		exit(0);
 	}
 
 	if (!strcmp(argv[1], "stop")) {
-		IN::thread_should_exit = true;
+		TASK::thread_should_exit = true;
 		exit(0);
 	}
 
 	if (!strcmp(argv[1], "status")) {
-		if (IN::thread_running) {
+		if (TASK::thread_running) {
 			warnx("is running");
-			INFO3();
+			INFO5();
 		} else {
 			warnx("not started");
 		}
@@ -173,28 +173,28 @@ int mc_IN_main(int argc, char *argv[])
 	exit(1);
 }
 
-int mc_IN_thread_main(int argc, char *argv[])
+int mc_TASK_thread_main(int argc, char *argv[])
 {
 
 	warnx("starting");
 
-	IN::control = new BlockINController;
+	TASK::control = new BlockTASKController;
 
-	if (IN::control == nullptr) {
+	if (TASK::control == nullptr) {
 		warnx("alloc failed");
 		return 1;
 	}
 
-	IN::thread_running = true;
+	TASK::thread_running = true;
 
-	while (!IN::thread_should_exit) {
-		IN::control->update();
+	while (!TASK::thread_should_exit) {
+		TASK::control->update();
 	}
 
 	warnx("exiting.");
-	delete IN::control;
-	IN::control = nullptr;
-	IN::thread_running = false;
+	delete TASK::control;
+	TASK::control = nullptr;
+	TASK::thread_running = false;
 
 	return 0;
 }

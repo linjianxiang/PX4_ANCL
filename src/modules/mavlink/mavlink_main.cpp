@@ -1996,6 +1996,10 @@ Mavlink::task_main(int argc, char *argv[])
 		configure_stream("WIND_COV", 1.0f);
 		configure_stream("VICON",20.0f);
 		configure_stream("IMAGE_ATTITUDE_TARGET", 2.0f);
+		// test 12.6
+		configure_stream("ACTUATOR_CONTROL_TARGET0", 10.0f);
+
+
 		break;
 
 	case MAVLINK_MODE_ONBOARD:

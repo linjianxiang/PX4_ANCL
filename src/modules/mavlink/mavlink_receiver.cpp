@@ -286,7 +286,8 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 		break;
     case MAVLINK_MSG_ID_IMG_MOMENTS:
         handle_message_img_moments(msg);
-        break;
+		break;
+
 	default:
 		break;
 	}

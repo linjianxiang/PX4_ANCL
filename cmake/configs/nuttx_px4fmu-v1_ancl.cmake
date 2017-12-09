@@ -94,6 +94,9 @@ set(config_module_list
 	#modified at 12.5
 	modules/mc_IN
 
+	#modified at 12.7
+	modules/mc_TASK
+
 	#modules/vtol_att_control
 
 	#

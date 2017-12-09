@@ -166,6 +166,7 @@ private:
 	struct battery_status_s				_battery_status;	/**< battery status */
 
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
+	
 	perf_counter_t	_controller_latency_perf;
 
 	math::Vector<3>		_rates_prev;	/**< angular rates on previous step */
@@ -346,7 +347,7 @@ MulticopterAttitudeControl::MulticopterAttitudeControl() :
 
 	/* performance counters */
 	_loop_perf(perf_alloc(PC_ELAPSED, "mc_att_control")),
-	_controller_latency_perf(perf_alloc_once(PC_ELAPSED, "ctrl_latency")),
+ 	_controller_latency_perf(perf_alloc_once(PC_ELAPSED, "ctrl_latency")),
 	_ts_opt_recovery(nullptr)
 
 {

@@ -32,12 +32,260 @@
  ****************************************************************************/
 
 /**
- * @file mc_IN_params.c
- * Multicopter IN controller parameters.
+ * @file mc_TASK_params.c
+ * Multicopter TASK controller parameters.
  *
  * @author yunzhi <yunzhi2@ualberta.ca>
  */
 
+
+/**
+ * Gain for image around image x axis in Body frame (Camera Frame)
+ *
+ * @unit norm
+ * @min 0
+ * @max 5.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_PID_X_P, 0.09f);
+
+/**
+ * Gain for image around image y axis in Body frame (Camera Frame)
+ *
+ * @unit norm
+ * @min 0
+ * @max 5.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_Y_P, 0.15f);
+
+/**
+ * Gain for image around image z axis  in Body frame (Camera Frame)
+ *
+ * @unit norm
+ * @min 0
+ * @max 5.0
+ * @decimal 2
+ * @increment 0.001
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_Z_P, 0.16f);
+
+
+/**
+ * Integral gain for horizontal velocity error
+ *
+ * Non-zero value allows to resist wind.
+ *
+ * @min 0.0
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_X_I, 0.02f);
+
+/**
+ * Integral gain for horizontal velocity error
+ *
+ * Non-zero value allows to resist wind.
+ *
+ * @min 0.0
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_Y_I, 0.02f);
+
+/**
+ * Integral gain for vertical velocity error
+ *
+ * @unit norm
+ * @min 0
+ * @max 5.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_Z_I, 0.02f);
+
+/**
+ * Gain for yaw
+ *
+ * @unit norm
+ * @min 0
+ * @max 5.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_YAW_P,0.6f);
+
+
+/**
+ * x integral Saturation
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_X_I_MAX, 0.035f);
+
+/**
+ * y integral Saturation
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_Y_I_MAX, 0.035f);
+
+/**
+ * z integral Saturation
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Multicopter TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_PID_Z_I_MAX, 0.035f);
+
+/**
+ * Differential gain for horizontal velocity error. Small values help reduce fast oscillations. If value is too big oscillations will appear again.
+ *
+ * @min 0.001
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_PID_X_D, 0.007f);
+
+/**
+ * Differential gain for horizontal velocity error. Small values help reduce fast oscillations. If value is too big oscillations will appear again.
+ *
+ * @min 0.005
+ * @max 0.1
+ * @decimal 3  
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_PID_Y_D, 0.01f);
+
+/**
+ * Differential gain for vertical velocity error
+ *
+ * @min 0.0
+ * @max 0.1
+ * @decimal 3
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_PID_Z_D, 0f);
+
+/**
+ * Lowpass for x error derivative calculation
+ *
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_PID_X_D_LP, 0.1f);
+
+/**
+ * Lowpass for y error derivative calculation
+ *
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_PID_Y_D_LP, 0.1f);
+
+/**
+ * Lowpass for y error derivative calculation
+ *
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_PID_Z_D_LP, 0.1f);
+
+
+
+
+
+/**
+ * Proportional gain for horizontal position error
+ *
+ * @min 0.0
+ * @max 2.0
+ * @decimal 2
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_POSX_P, 0.95f);
+
+/**
+ * Proportional gain for horizontal position error
+ *
+ * @min 0.0
+ * @max 2.0
+ * @decimal 2
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_POSY_P, 0.95f);
+
+/**
+ * Proportional gain for vertical position error
+ *
+ * @unit norm
+ * @min 0
+ * @max 5.0
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter TASK Control
+ */
+
+PARAM_DEFINE_FLOAT(TASK_POSZ_P, 1.0f);
+
+/**
+ * thrust required for gravity
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 3
+ * @increment 0.01
+ * @group Multicopter  TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_G, 0.05f);
+
+/**
+ * yaw setpoint
+ *
+ * @unit norm
+ * @min 0
+ * @max 1.0
+ * @decimal 3
+ * @group Multicopter  TASK Control
+ */
+PARAM_DEFINE_FLOAT(TASK_YAW_CONST, 0.0f);
+
+
+
+
+
+//TODO: IN
 
 /**
  * Roll rate P gain
@@ -50,7 +298,7 @@
  * @increment 0.01
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_X_P,0.15f);
+PARAM_DEFINE_FLOAT(TASK_A_R_P,0.15f);
 
 /**
  * Pitch rate P gain
@@ -63,7 +311,7 @@ PARAM_DEFINE_FLOAT(IN_PID_X_P,0.15f);
  * @increment 0.01
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Y_P, 0.15f);
+PARAM_DEFINE_FLOAT(TASK_A_P_P, 0.15f);
 
 /**
  * Yaw rate P gain
@@ -76,7 +324,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Y_P, 0.15f);
  * @increment 0.01
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Z_P, 0.2f);
+PARAM_DEFINE_FLOAT(TASK_A_Y_P, 0.2f);
 
 
 /**
@@ -89,7 +337,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Z_P, 0.2f);
  * @increment 0.01
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_X_I, 0.05f);
+PARAM_DEFINE_FLOAT(TASK_A_R_I, 0.05f);
 
 /**
  * Pitch rate I gain
@@ -101,7 +349,7 @@ PARAM_DEFINE_FLOAT(IN_PID_X_I, 0.05f);
  * @increment 0.01
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Y_I, 0.05f);
+PARAM_DEFINE_FLOAT(TASK_A_P_I, 0.05f);
 
 /**
  * Yaw rate I gain
@@ -113,7 +361,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Y_I, 0.05f);
  * @increment 0.01
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Z_I, 0.1f);
+PARAM_DEFINE_FLOAT(TASK_A_Y_I, 0.1f);
 
 
 /**
@@ -126,7 +374,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Z_I, 0.1f);
  * @increment 0.001
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_X_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(TASK_A_R_I_MAX, 0.035f);
 
 /**
  * y integral Saturation
@@ -138,7 +386,7 @@ PARAM_DEFINE_FLOAT(IN_PID_X_I_MAX, 0.035f);
  * @increment 0.001
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Y_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(TASK_A_P_I_MAX, 0.035f);
 
 /**
  * z integral Saturation
@@ -150,7 +398,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Y_I_MAX, 0.035f);
  * @increment 0.001
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Z_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(TASK_A_Y_I_MAX, 0.035f);
 
 /**
  * Roll rate D gain
@@ -164,7 +412,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Z_I_MAX, 0.035f);
  * @group Multicopter IN Control
  */
 
-PARAM_DEFINE_FLOAT(IN_PID_X_D, 0.003f);
+PARAM_DEFINE_FLOAT(TASK_A_R_D, 0.003f);
 
 /**
  * Pitch rate D gain
@@ -176,7 +424,7 @@ PARAM_DEFINE_FLOAT(IN_PID_X_D, 0.003f);
  * @increment 0.0005
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Y_D, 0.003f);
+PARAM_DEFINE_FLOAT(TASK_A_P_D, 0.003f);
 
 /**
  * Yaw rate D gain
@@ -188,7 +436,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Y_D, 0.003f);
  * @increment 0.01
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PID_Z_D, 0f);
+PARAM_DEFINE_FLOAT(TASK_A_Y_D, 0f);
 
 /**
  * Lowpass for x error derivative calculation
@@ -196,7 +444,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Z_D, 0f);
  * @group Multicopter IN Control
  */
 
-PARAM_DEFINE_FLOAT(IN_PID_X_D_LP, 0.1f);
+PARAM_DEFINE_FLOAT(TASK_A_R_D_LP, 0.1f);
 
 /**
  * Lowpass for y error derivative calculation
@@ -204,7 +452,7 @@ PARAM_DEFINE_FLOAT(IN_PID_X_D_LP, 0.1f);
  * @group Multicopter IN Control
  */
 
-PARAM_DEFINE_FLOAT(IN_PID_Y_D_LP, 0.1f);
+PARAM_DEFINE_FLOAT(TASK_A_P_D_LP, 0.1f);
 
 /**
  * Lowpass for z error derivative calculation
@@ -212,7 +460,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Y_D_LP, 0.1f);
  * @group Multicopter IN Control
  */
 
-PARAM_DEFINE_FLOAT(IN_PID_Z_D_LP, 0.1f);
+PARAM_DEFINE_FLOAT(TASK_A_Y_D_LP, 0.1f);
 
 
 
@@ -230,7 +478,7 @@ PARAM_DEFINE_FLOAT(IN_PID_Z_D_LP, 0.1f);
  * @group Multicopter IN Control
  */
 
-PARAM_DEFINE_FLOAT(IN_POSX_P, 6.5f);
+PARAM_DEFINE_FLOAT(TASK_RATE_RAW_P, 6.5f);
 
 /**
  * Pitch P gain
@@ -245,7 +493,7 @@ PARAM_DEFINE_FLOAT(IN_POSX_P, 6.5f);
  * @group Multicopter IN Control
  */
 
-PARAM_DEFINE_FLOAT(IN_POSY_P, 6.5f);
+PARAM_DEFINE_FLOAT(TASK_RATE_PIT_P, 6.5f);
 
 /**
  * Yaw P gain
@@ -259,37 +507,7 @@ PARAM_DEFINE_FLOAT(IN_POSY_P, 6.5f);
  * @increment 0.1
  * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_POSZ_P, 2.8f);
-
-
-
-
-
-
-
-
-/**
- * thrust required for gravity
- *
- * @unit norm
- * @min 0
- * @max 1.0
- * @decimal 3
- * @increment 0.01
- * @group Multicopter  IN Control
- */
-PARAM_DEFINE_FLOAT(IN_G, 0.05f);
-
-/**
- * yaw setpoint
- *
- * @unit norm
- * @min 0
- * @max 1.0
- * @decimal 3
- * @group Multicopter  IN Control
- */
-PARAM_DEFINE_FLOAT(IN_YAW_CONST, 0.0f);
+PARAM_DEFINE_FLOAT(TASK_RATE_YAW_P, 2.8f);
 
 /**
  * Max roll rate
@@ -301,9 +519,9 @@ PARAM_DEFINE_FLOAT(IN_YAW_CONST, 0.0f);
  * @max 360.0
  * @decimal 1
  * @increment 5
- * @group Multicopter Attitude Control
+ * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_ROLLRATE_MAX, 220.0f);
+PARAM_DEFINE_FLOAT(TASK_RRATE_MAX, 220.0f);
 
 /**
  * Max pitch rate
@@ -315,9 +533,9 @@ PARAM_DEFINE_FLOAT(IN_ROLLRATE_MAX, 220.0f);
  * @max 360.0
  * @decimal 1
  * @increment 5
- * @group Multicopter Attitude Control
+ * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_PITCHRATE_MAX, 220.0f);
+PARAM_DEFINE_FLOAT(TASK_PRATE_MAX, 220.0f);
 
 /**
  * Max yaw rate
@@ -329,7 +547,17 @@ PARAM_DEFINE_FLOAT(IN_PITCHRATE_MAX, 220.0f);
  * @max 360.0
  * @decimal 1
  * @increment 5
- * @group Multicopter Attitude Control
+ * @group Multicopter IN Control
  */
-PARAM_DEFINE_FLOAT(IN_YAWRATE_MAX, 200.0f);
+PARAM_DEFINE_FLOAT(TASK_YRATE_MAX, 200.0f);
+
+
+
+
+
+
+
+
+
+
 
