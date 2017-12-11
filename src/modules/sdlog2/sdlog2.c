@@ -68,6 +68,14 @@
 #include <unistd.h>
 #include <drivers/drv_hrt.h>
 #include <math.h>
+
+
+
+#include <mathlib/mathlib.h>
+#include <lib/geo/geo.h>
+
+
+
 #include <time.h>
 
 #include <uORB/uORB.h>
@@ -119,6 +127,9 @@
 #include <systemlib/printload.h>
 #include <systemlib/mavlink_log.h>
 #include <version/version.h>
+
+#include <uORB/topics/vehicle_secondary_attitude_setpoint.h>
+#include <uORB/topics/vicon.h>
 
 #include "logbuffer.h"
 #include "sdlog2_format.h"
@@ -1222,6 +1233,9 @@ int sdlog2_thread_main(int argc, char *argv[])
 		struct vehicle_land_detected_s land_detected;
 		struct cpuload_s cpuload;
 		struct vehicle_gps_position_s dual_gps_pos;
+		
+		struct vehicle_secondary_attitude_setpoint_s secondary_sp;
+		struct vicon_s vicon;
 	} buf;
 
 	memset(&buf, 0, sizeof(buf));
@@ -1284,6 +1298,9 @@ int sdlog2_thread_main(int argc, char *argv[])
 			struct log_RPL6_s log_RPL6;
 			struct log_LOAD_s log_LOAD;
 			struct log_DPRS_s log_DPRS;
+
+			struct log_IASP_s log_IASP;
+			struct log_VIC_s log_VIC;
 		} body;
 	} log_msg = {
 		LOG_PACKET_HEADER_INIT(0)
@@ -1334,6 +1351,9 @@ int sdlog2_thread_main(int argc, char *argv[])
 		int commander_state_sub;
 		int cpuload_sub;
 		int diff_pres_sub;
+
+		int secondary_sp_sub;
+		int vicon_sub;
 	} subs;
 
 	subs.cmd_sub = -1;
@@ -1377,6 +1397,9 @@ int sdlog2_thread_main(int argc, char *argv[])
 	subs.commander_state_sub = -1;
 	subs.cpuload_sub = -1;
 	subs.diff_pres_sub = -1;
+
+	subs.secondary_sp_sub=-1;
+	subs.vicon_sub=-1;
 
 	/* add new topics HERE */
 
@@ -2322,6 +2345,44 @@ int sdlog2_thread_main(int argc, char *argv[])
 
 		}
 
+		/* --- secondary ATTITUDE SETPOINT--- */
+		if (copy_if_updated(ORB_ID(vehicle_secondary_attitude_setpoint), &subs.secondary_sp_sub, &buf.secondary_sp)) {
+			log_msg.msg_type = LOG_IASP_MSG;
+			log_msg.body.log_IASP.roll = buf.secondary_sp.roll;
+			log_msg.body.log_IASP.pitch = buf.secondary_sp.pitch;
+			log_msg.body.log_IASP.yaw = buf.secondary_sp.yaw ;
+			log_msg.body.log_IASP.thrust = buf.secondary_sp.thrust;
+			log_msg.body.log_IASP.valid = buf.secondary_sp.valid;
+		
+			LOGBUFFER_WRITE_AND_COUNT(IASP);
+		}
+
+		/* ---VICON --- */
+		if (copy_if_updated(ORB_ID(vicon), &subs.vicon_sub, &buf.vicon)) {
+			log_msg.msg_type = LOG_VIC_MSG;
+			log_msg.body.log_VIC.p_x = buf.vicon.p[0];
+			log_msg.body.log_VIC.p_y = buf.vicon.p[1];
+			log_msg.body.log_VIC.p_z = buf.vicon.p[2] ;
+			log_msg.body.log_VIC.v_x = buf.vicon.v[0];
+			log_msg.body.log_VIC.v_y = buf.vicon.v[1];
+			log_msg.body.log_VIC.v_z = buf.vicon.v[2] ;
+
+
+			log_msg.body.log_VIC.q0 = buf.vicon.q[0];
+			log_msg.body.log_VIC.q1 = buf.vicon.q[1];
+			log_msg.body.log_VIC.q2 = buf.vicon.q[2] ;
+			log_msg.body.log_VIC.q3 = buf.vicon.q[3];
+			
+			//matrix::Eulerf Eta=matrix::Quatf((double)buf.vicon.q[0],(double)buf.vicon.q[1],(double)buf.vicon.q[2],(double)buf.vicon.q[3]);
+			//log_msg.body.log_VIC.roll = Eta(0);
+			//log_msg.body.log_VIC.pitch = Eta(1);
+			//log_msg.body.log_VIC.yaw = Eta(2);
+		
+		
+		 LOGBUFFER_WRITE_AND_COUNT(VIC);
+		}
+
+
 		pthread_mutex_lock(&logbuffer_mutex);
 
 		/* signal the other thread new data, but not yet unlock */
@@ -2329,6 +2390,7 @@ int sdlog2_thread_main(int argc, char *argv[])
 			/* only request write if several packets can be written at once */
 			pthread_cond_signal(&logbuffer_cond);
 		}
+
 
 		/* unlock, now the writer thread may run */
 		pthread_mutex_unlock(&logbuffer_mutex);

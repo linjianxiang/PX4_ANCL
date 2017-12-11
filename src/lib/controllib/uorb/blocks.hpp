@@ -45,6 +45,11 @@
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/position_setpoint_triplet.h>
+
+//modified by yunzhi
+//#include <uORB/topics/vehicle_global_velocity_setpoint.h>
+
+
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/actuator_controls.h>
@@ -52,8 +57,12 @@
 #include <uORB/topics/img_moments.h>
 #include <uORB/topics/img_point.h>
 #include <uORB/topics/img_line.h>
+
 #include <uORB/topics/vehicle_secondary_attitude_setpoint.h>
 #include <uORB/topics/vehicle_secondary_control_setpoint.h>
+
+//#include <uORB/topics/vehicle_image_attitude_setpoint.h>
+#include <uORB/topics/vicon.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,6 +142,7 @@ public:
 	virtual ~BlockANCLOuterLoop();
 };
 
+
 /**
  * ANCL Inner Loop with uORB
  */
@@ -174,6 +184,93 @@ protected:
 public:
 	BlockANCLLoop(SuperBlock *parent, const char *name);
 	virtual ~BlockANCLLoop();
+
+};
+/**
+ * yunzhi NewPID Outer Loop with uORB
+ */
+
+
+class __EXPORT BlockNewPIDOuterLoop : public SuperBlock
+{
+protected:
+        //subscriptions
+        //uORB::Subscription<vehicle_attitude_s> _att;
+
+        //uORB::Subscription<img_moments_s> _img_moments;
+        //uORB::Subscription<img_point_s> _img_point;
+        //uORB::Subscription<img_line_s> _img_line;
+		
+		
+		//modified by yunzhi
+		//uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp_LIN;
+		uORB::Subscription<vicon_s> _vicon;
+        uORB::Subscription<vehicle_status_s> _status;
+		uORB::Subscription<parameter_update_s> _param_update;
+		
+		
+
+        uORB::Subscription<vehicle_local_position_s> _pos;
+        //publications
+        uORB::Publication<vehicle_secondary_attitude_setpoint_s> _att_sp;
+public:
+        BlockNewPIDOuterLoop(SuperBlock *parent, const char *name);
+        virtual ~BlockNewPIDOuterLoop();
+};
+
+class __EXPORT BlockINLoop : public SuperBlock
+{
+protected:
+        //subscriptions
+        //uORB::Subscription<vehicle_attitude_s> _att;
+
+        //uORB::Subscription<img_moments_s> _img_moments;
+        //uORB::Subscription<img_point_s> _img_point;
+        //uORB::Subscription<img_line_s> _img_line;
+		
+		
+		//modified by yunzhi
+		//uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp_LIN;
+		uORB::Subscription<vicon_s> _vicon;
+		uORB::Subscription<vehicle_attitude_setpoint_s> _v_att_sp;
+		uORB::Subscription<control_state_s>_ctrl_state;
+
+        uORB::Subscription<vehicle_status_s> _status;
+		uORB::Subscription<parameter_update_s> _param_update;
+
+		//publications
+		uORB::Publication<actuator_controls_s> _actuators;
+        uORB::Publication<vehicle_secondary_attitude_setpoint_s> _att_sp;
+public:
+        BlockINLoop(SuperBlock *parent, const char *name);
+        virtual ~BlockINLoop();
+};
+	
+	
+class __EXPORT BlockTASKLoop : public SuperBlock
+{
+protected:
+        //subscriptions
+        //uORB::Subscription<vehicle_attitude_s> _att;
+
+        //uORB::Subscription<img_moments_s> _img_moments;
+        //uORB::Subscription<img_point_s> _img_point;
+        //uORB::Subscription<img_line_s> _img_line;
+		//modified by yunzhi
+		//uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp_LIN;
+		uORB::Subscription<vicon_s> _vicon;
+		uORB::Subscription<control_state_s>_ctrl_state;
+        uORB::Subscription<vehicle_status_s> _status;
+		uORB::Subscription<parameter_update_s> _param_update;
+		
+        uORB::Subscription<vehicle_local_position_s> _pos;
+        //publications
+		uORB::Publication<vehicle_secondary_attitude_setpoint_s> _att_sp;
+		uORB::Publication<actuator_controls_s> _actuators;
+public:
+        BlockTASKLoop(SuperBlock *parent, const char *name);
+        virtual ~BlockTASKLoop();
+
 };
 
 

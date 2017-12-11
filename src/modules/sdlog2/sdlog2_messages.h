@@ -655,6 +655,34 @@ struct log_PARM_s {
 	char name[16];
 	float value;
 };
+
+/* --- IASP -IMAGE ATTITUDE SETPOINT--- */
+#define LOG_IASP_MSG 132
+struct log_IASP_s {
+	float roll;
+	float pitch;
+	float yaw;
+	float thrust;
+	bool valid;
+};
+
+#define LOG_VIC_MSG 133
+struct log_VIC_s {
+	float p_x;
+	float p_y;
+	float p_z;
+	float v_x;
+	float v_y;
+	float v_z;
+	float q0;
+	float q1;
+	float q2;
+	float q3;
+};
+
+
+
+
 #pragma pack(pop)
 
 // the lower type of initialisation is not supported in C++
@@ -728,7 +756,10 @@ static const struct log_format_s log_formats[] = {
 	/* FMT: don't write format of format message, it's useless */
 	LOG_FORMAT(TIME, "Q", "StartTime"),
 	LOG_FORMAT(VER, "NZ", "Arch,FwGit"),
-	LOG_FORMAT(PARM, "Nf", "Name,Value")
+	LOG_FORMAT(PARM, "Nf", "Name,Value"),
+
+	LOG_FORMAT(IASP, "ffffB", "roll,pitch,yaw,thrust,valid"),
+	LOG_FORMAT(VIC, "ffffffffff", "p_x,p_y,p_z,v_x,v_y,v_z,q0,q1,q2,q3")
 };
 
 static const unsigned log_formats_num = sizeof(log_formats) / sizeof(log_formats[0]);

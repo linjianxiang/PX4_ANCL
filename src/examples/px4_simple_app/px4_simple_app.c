@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file px4_simple_app.c
+ * @file px4_simple_app.cpp
  * Minimal application example for PX4 autopilot
  *
  * @author Example User <mail@example.com>
@@ -42,43 +42,52 @@
 #include <px4_tasks.h>
 #include <px4_posix.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
+#include <mathlib/mathlib.h>
 #include <uORB/uORB.h>
 #include <uORB/topics/sensor_combined.h>
+
 #include <uORB/topics/vehicle_attitude.h>
+
+//#include <uORB/topics/vehicle_attitude.h>
 
 __EXPORT int px4_simple_app_main(int argc, char *argv[]);
 
 int px4_simple_app_main(int argc, char *argv[])
 {
-	PX4_INFO("Hello Sky!");
+	//PX4_INFO("Hello Sky!");
 
 	/* subscribe to sensor_combined topic */
-	int sensor_sub_fd = orb_subscribe(ORB_ID(sensor_combined));
+	int sensor_sub_fd = orb_subscribe(ORB_ID(vehicle_attitude));
 	/* limit the update rate to 5 Hz */
 	orb_set_interval(sensor_sub_fd, 200);
 
-	/* advertise attitude topic */
-	struct vehicle_attitude_s att;
-	memset(&att, 0, sizeof(att));
-	orb_advert_t att_pub = orb_advertise(ORB_ID(vehicle_attitude), &att);
-
+	/*
+		 advertise attitude topic 
+		struct vehicle_attitude_s att;
+		memset(&att, 0, sizeof(att));
+		orb_advert_t att_pub = orb_advertise(ORB_ID(vehicle_attitude), &att);
+	*/
+	
 	/* one could wait for multiple topics with this technique, just using one here */
-	px4_pollfd_struct_t fds[] = {
-		{ .fd = sensor_sub_fd,   .events = POLLIN },
+	px4_pollfd_struct_t fds[1];
+	fds[0].fd = sensor_sub_fd;
+	fds[0].events= POLLIN ;
 		/* there could be more file descriptors here, in the form like:
 		 * { .fd = other_sub_fd,   .events = POLLIN },
 		 */
-	};
+
 
 	int error_counter = 0;
 
 	for (int i = 0; i < 5; i++) {
 		/* wait for sensor update of 1 file descriptor for 1000 ms (1 second) */
-		int poll_ret = px4_poll(fds, 1, 1000);
+		int poll_ret = poll(fds, (sizeof(fds) / sizeof(fds[0])), 1000);
 
 		/* handle the poll result */
 		if (poll_ret == 0) {
@@ -98,22 +107,43 @@ int px4_simple_app_main(int argc, char *argv[])
 
 			if (fds[0].revents & POLLIN) {
 				/* obtained data for the first file descriptor */
-				struct sensor_combined_s raw;
+				struct vehicle_attitude_s data;
 				/* copy sensors raw data into local buffer */
-				orb_copy(ORB_ID(sensor_combined), sensor_sub_fd, &raw);
-				PX4_INFO("Accelerometer:\t%8.4f\t%8.4f\t%8.4f",
-					 (double)raw.accelerometer_m_s2[0],
-					 (double)raw.accelerometer_m_s2[1],
-					 (double)raw.accelerometer_m_s2[2]);
+				orb_copy(ORB_ID(vehicle_attitude), sensor_sub_fd, &data);
 
-				/* set att and publish this information for other apps
+
+
+				
+			//matrix::Eulerf Eta=matrix::Quatf((double)raw.q[0],(double)raw.q[1],(double)raw.q[2],(double)raw.q[3]);
+		
+			float roll =	atan2f(2.0f * (data.q[0] * data.q[1] + data.q[2] * data.q[3]), 1.0f - 2.0f * (data.q[1] * data.q[1] + data.q[2] * data.q[2])); 
+			float  pitch = asinf(2.0f * (data.q[0] * data.q[2] - data.q[3] * data.q[1])); 
+    		float 	yaw = atan2f(2.0f * (data.q[0] * data.q[3] + data.q[1] * data.q[2]), 1.0f - 2.0f * (data.q[2] * data.q[2] + data.q[3] * data.q[3])); 
+
+
+
+   			//float roll = atan2f(2.f * (raw.q[2]*raw.q[3] + raw.q[0]*raw.q[1]), raw.q[0]*raw.q[0] - raw.q[1]*raw.q[1] - raw.q[2]*raw.q[2] + raw.q[3]*raw.q[3]); 
+			//float  pitch = asinf(2.f * (raw.q[0]*raw.q[2] - raw.q[1]*raw.q[3])); 
+    		//float 	yaw = atan2f(2.f * (raw.q[1]*raw.q[2] + raw.q[0]*raw.q[3]), raw.q[0]*raw.q[0] + raw.q[1]*raw.q[1] - raw.q[2]*raw.q[2] - raw.q[3]*raw.q[3]); 
+
+
+
+			//PX4_INFO("Eta: (%2.3f,%2.3f,%2.3f)",(double)Eta(0),(double)Eta(1),(double)Eta(2));
+
+				PX4_INFO("roll:%8.4f pitch:%8.4f yaw:%8.4f",
+					 (double)roll,
+					 (double) pitch,
+					(double)	yaw);
+				
+
+				/* set att and publish this information for other appspatam pp
 				 the following does not have any meaning, it's just an example
 				*/
-				att.q[0] = raw.accelerometer_m_s2[0];
-				att.q[1] = raw.accelerometer_m_s2[1];
-				att.q[2] = raw.accelerometer_m_s2[2];
+				//att.q[0] = raw.accelerometer_m_s2[0];
+				//att.q[1] = raw.accelerometer_m_s2[1];
+				//att.q[2] = raw.accelerometer_m_s2[2];
 
-				orb_publish(ORB_ID(vehicle_attitude), att_pub, &att);
+				//orb_publish(ORB_ID(vehicle_attitude), att_pub, &att);
 			}
 
 			/* there could be more file descriptors here, in the form like:

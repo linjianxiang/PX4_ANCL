@@ -87,12 +87,22 @@ set(config_module_list
 	modules/mc_att_control
 	modules/mc_pos_control
 	modules/mc_ibvs
+
+	#modified at 11.20
+	modules/mc_NewPID
+
+	#modified at 12.5
+	modules/mc_IN
+
+	#modified at 12.7
+	modules/mc_TASK
+
 	#modules/vtol_att_control
 
 	#
 	# Logging
 	#
-	#modules/sdlog2
+	modules/sdlog2
 	modules/logger
 
 	#
@@ -142,7 +152,7 @@ set(config_module_list
 	#examples/math_demo
 	# Tutorial code from
 	# https://px4.io/dev/px4_simple_app
-	#examples/px4_simple_app
+	examples/px4_simple_app
 
 	# Tutorial code from
 	# https://px4.io/dev/daemon

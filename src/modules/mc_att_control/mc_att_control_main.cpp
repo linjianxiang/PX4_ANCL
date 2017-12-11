@@ -108,7 +108,7 @@ extern "C" __EXPORT int mc_att_control_main(int argc, char *argv[]);
 #define AXIS_INDEX_YAW 2
 #define AXIS_COUNT 3
 
-class MulticopterAttitudeControl
+class MulticopterAttitudeControl  
 {
 public:
 	/**
@@ -166,6 +166,7 @@ private:
 	struct battery_status_s				_battery_status;	/**< battery status */
 
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
+	
 	perf_counter_t	_controller_latency_perf;
 
 	math::Vector<3>		_rates_prev;	/**< angular rates on previous step */
@@ -346,7 +347,7 @@ MulticopterAttitudeControl::MulticopterAttitudeControl() :
 
 	/* performance counters */
 	_loop_perf(perf_alloc(PC_ELAPSED, "mc_att_control")),
-	_controller_latency_perf(perf_alloc_once(PC_ELAPSED, "ctrl_latency")),
+ 	_controller_latency_perf(perf_alloc_once(PC_ELAPSED, "ctrl_latency")),
 	_ts_opt_recovery(nullptr)
 
 {
@@ -704,18 +705,21 @@ MulticopterAttitudeControl::control_attitude(float dt)
 
 	/* all input data is ready, run controller itself */
 
+	// TODO: rotate the z axis
 	/* try to move thrust vector shortest way, because yaw response is slower than roll/pitch */
 	math::Vector<3> R_z(R(0, 2), R(1, 2), R(2, 2));
 	math::Vector<3> R_sp_z(R_sp(0, 2), R_sp(1, 2), R_sp(2, 2));
 
+	//TODO: e*sin(theta)
 	/* axis and sin(angle) of desired rotation */
 	math::Vector<3> e_R = R.transposed() * (R_z % R_sp_z);
-
+	
 	/* calculate angle error */
 	float e_R_z_sin = e_R.length();
 	float e_R_z_cos = R_z * R_sp_z;
 
 	/* calculate weight for yaw control */
+	// Note the Rotation Matrix 
 	float yaw_w = R_sp(2, 2) * R_sp(2, 2);
 
 	/* calculate rotation matrix after roll/pitch only rotation */
@@ -726,9 +730,12 @@ MulticopterAttitudeControl::control_attitude(float dt)
 		float e_R_z_angle = atan2f(e_R_z_sin, e_R_z_cos);
 		math::Vector<3> e_R_z_axis = e_R / e_R_z_sin;
 
+		//TODO: e*theta
 		e_R = e_R_z_axis * e_R_z_angle;
 
 		/* cross product matrix for e_R_axis */
+		
+		//
 		math::Matrix<3, 3> e_R_cp;
 		e_R_cp.zero();
 		e_R_cp(0, 1) = -e_R_z_axis(2);
@@ -738,7 +745,7 @@ MulticopterAttitudeControl::control_attitude(float dt)
 		e_R_cp(2, 0) = -e_R_z_axis(1);
 		e_R_cp(2, 1) = e_R_z_axis(0);
 
-		/* rotation matrix for roll/pitch only rotation */
+		/* rotation matrix for roll/pitch only rotation */  //TODO: rodrigues'rotation formula
 		R_rp = R * (_I + e_R_cp * e_R_z_sin + e_R_cp * e_R_cp * (1.0f - e_R_z_cos));
 
 	} else {
@@ -749,7 +756,10 @@ MulticopterAttitudeControl::control_attitude(float dt)
 	/* R_rp and R_sp has the same Z axis, calculate yaw error */
 	math::Vector<3> R_sp_x(R_sp(0, 0), R_sp(1, 0), R_sp(2, 0));
 	math::Vector<3> R_rp_x(R_rp(0, 0), R_rp(1, 0), R_rp(2, 0));
-	e_R(2) = atan2f((R_rp_x % R_sp_x) * R_sp_z, R_rp_x * R_sp_x) * yaw_w;
+
+	//TODO:    get cos and sin then atan2 -> angle
+	//         if z err large then yaw_w large  
+ 	e_R(2) = atan2f((R_rp_x % R_sp_x) * R_sp_z, R_rp_x * R_sp_x) * yaw_w;
 
 	if (e_R_z_cos < 0.0f) {
 		/* for large thrust vector rotations use another rotation method:
@@ -759,10 +769,12 @@ MulticopterAttitudeControl::control_attitude(float dt)
 		math::Vector<3> e_R_d = q_error(0) >= 0.0f ? q_error.imag()  * 2.0f : -q_error.imag() * 2.0f;
 
 		/* use fusion of Z axis based rotation and direct rotation */
+		//TODO: first order of lowpass filter
 		float direct_w = e_R_z_cos * e_R_z_cos * yaw_w;
 		e_R = e_R * (1.0f - direct_w) + e_R_d * direct_w;
 	}
 
+	//TODO: P controller  
 	/* calculate angular rates setpoint */
 	_rates_sp = _params.att_p.emult(e_R);
 
@@ -809,7 +821,7 @@ MulticopterAttitudeControl::control_attitude_rates(float dt)
 	rates(1) = _ctrl_state.pitch_rate;
 	rates(2) = _ctrl_state.yaw_rate;
 
-	/* throttle pid attenuation factor */
+	/* throttle pid attenuation factor */ //TODO: non-linear PID 
 	float tpa =  fmaxf(0.0f, fminf(1.0f, 1.0f - _params.tpa_slope * (fabsf(_v_rates_sp.thrust) - _params.tpa_breakpoint)));
 
 	/* angular rates error */
@@ -818,9 +830,10 @@ MulticopterAttitudeControl::control_attitude_rates(float dt)
 	_att_control = _params.rate_p.emult(rates_err * tpa) + _params.rate_d.emult(_rates_prev - rates) / dt + _rates_int +
 		       _params.rate_ff.emult(_rates_sp);
 
-	_rates_sp_prev = _rates_sp;
+	_rates_sp_prev = _rates_sp;   //TODO: not used 
 	_rates_prev = rates;
 
+	//TODO: Anti-Windup 
 	/* update integral only if not saturated on low limit and if motor commands are not saturated */
 	if (_thrust_sp > MIN_TAKEOFF_THRUST && !_motor_limits.lower_limit && !_motor_limits.upper_limit) {
 		for (int i = AXIS_INDEX_ROLL; i < AXIS_COUNT; i++) {

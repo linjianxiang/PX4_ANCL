@@ -1448,7 +1448,9 @@ MulticopterPositionControl::task_main()
 	_pos_sp_triplet_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
 	_local_pos_sp_sub = orb_subscribe(ORB_ID(vehicle_local_position_setpoint));
 	_global_vel_sp_sub = orb_subscribe(ORB_ID(vehicle_global_velocity_setpoint));
+
         _secondary_att_sp_sub = orb_subscribe(ORB_ID(vehicle_secondary_attitude_setpoint));
+
 
 
 	parameters_update(true);
@@ -1988,19 +1990,19 @@ MulticopterPositionControl::task_main()
 						}
 
 						/* assume ground, cut thrust */
-						if (_in_landing
-						    && _vel_z_lp < 0.1f) {
-							thr_max = 0.0f;
-							_in_landing = false;
-							_lnd_reached_ground = true;
-						}
+						//if (_in_landing
+						//    && _vel_z_lp < 0.1f) {
+						//	thr_max = 0.0f;
+						//	_in_landing = false;
+						//	_lnd_reached_ground = true;
+						//}
 
 						/* once we assumed to have reached the ground always cut the thrust.
 							Only free fall detection below can revoke this
 						*/
-						if (!_in_landing && _lnd_reached_ground) {
-							thr_max = 0.0f;
-						}
+						//if (!_in_landing && _lnd_reached_ground) {
+						//	thr_max = 0.0f;
+						//}
 
 						/* if we suddenly fall, reset landing logic and remove thrust limit */
 						if (_lnd_reached_ground
@@ -2353,11 +2355,19 @@ MulticopterPositionControl::task_main()
 
 
 			//TODO
+
 			if (_secondary_att_sp_valid && _mode_ancl2 && _params.use_vision ) {
 				if (_params.mix_vision_roll) _att_sp.roll_body = _secondary_att_sp.roll;
 				if (_params.mix_vision_pitch) _att_sp.pitch_body = _secondary_att_sp.pitch;
 				if (_params.mix_vision_yaw) _att_sp.yaw_body = _secondary_att_sp.yaw;
 				if (_params.mix_vision_thrust) _att_sp.thrust = _secondary_att_sp.thrust;
+
+			// if (_image_att_sp_valid && _mode_ancl2 && _params.use_vision ) {
+			// 	if (_params.mix_vision_roll) _att_sp.roll_body = _image_att_sp.roll;
+			// 	if (_params.mix_vision_pitch) _att_sp.pitch_body = _image_att_sp.pitch;
+			// 	if (_params.mix_vision_yaw) _att_sp.yaw_body = _image_att_sp.yaw;
+			// 	if (_params.mix_vision_thrust) _att_sp.thrust = _image_att_sp.thrust;
+
                                 //Assume data copied correctly then set the quaterion for att_control
                                 matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body, _att_sp.yaw_body);
                                 /* copy quaternion setpoint to attitude setpoint topic */

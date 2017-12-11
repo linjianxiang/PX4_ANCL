@@ -31,10 +31,12 @@
 #
 ############################################################################
 px4_add_module(
-	MODULE examples__px4_simple_app
-	MAIN px4_simple_app
+	MODULE modules__mc_IN
+	MAIN mc_IN
 	SRCS
-		px4_simple_app.c
+		mc_IN_main.cpp
+		BlockINController.cpp
+		
 	DEPENDS
 		platforms__common
 	)

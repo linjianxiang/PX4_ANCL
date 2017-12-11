@@ -145,5 +145,81 @@ BlockANCLLoop::BlockANCLLoop(SuperBlock *parent, const char *name):SuperBlock(pa
 BlockANCLLoop::~BlockANCLLoop() {};
 
 
-} // namespace control
 
+
+
+BlockNewPIDOuterLoop::BlockNewPIDOuterLoop(SuperBlock *parent, const char *name):SuperBlock(parent,name),
+        // subscriptions
+        //_att(ORB_ID(vehicle_attitude),20,0,&getSubscriptions()),
+
+        //_img_moments(ORB_ID(img_moments),20,0,&getSubscriptions()),
+        //_img_point(ORB_ID(img_point),20,0,&getSubscriptions()),
+        //_img_line(ORB_ID(img_line),20,0,&getSubscriptions()),
+		
+		//modified by yunzhi
+		//_vel_sp_LIN(ORB_ID(vehicle_global_velocity_setpoint), 20, 0, &getSubscriptions()),
+		_vicon(ORB_ID(vicon), 20, 0, &getSubscriptions()),
+        _status(ORB_ID(vehicle_status), 20, 0, &getSubscriptions()),
+        _param_update(ORB_ID(parameter_update), 1000, 0, &getSubscriptions()), // limit to 1 Hz
+        _pos(ORB_ID(vehicle_local_position), 20, 0, &getSubscriptions()),
+        //publications
+        _att_sp(ORB_ID(vehicle_secondary_attitude_setpoint),-1,&getPublications())
+{}
+
+BlockNewPIDOuterLoop::~BlockNewPIDOuterLoop() {};
+
+
+
+
+
+BlockINLoop::BlockINLoop(SuperBlock *parent, const char *name):SuperBlock(parent,name),
+        // subscriptions
+        //_att(ORB_ID(vehicle_attitude),20,0,&getSubscriptions()),
+
+        //_img_moments(ORB_ID(img_moments),20,0,&getSubscriptions()),
+        //_img_point(ORB_ID(img_point),20,0,&getSubscriptions()),
+        //_img_line(ORB_ID(img_line),20,0,&getSubscriptions()),
+		
+		//modified by yunzhi
+		//_vel_sp_LIN(ORB_ID(vehicle_global_velocity_setpoint), 20, 0, &getSubscriptions()),
+		_vicon(ORB_ID(vicon), 20, 0, &getSubscriptions()),
+		_v_att_sp(ORB_ID(vehicle_attitude_setpoint), 20, 0, &getSubscriptions()),
+		_ctrl_state(ORB_ID(control_state), 20, 0, &getSubscriptions()),
+
+        _status(ORB_ID(vehicle_status), 20, 0, &getSubscriptions()),
+		_param_update(ORB_ID(parameter_update), 1000, 0, &getSubscriptions()), // limit to 1 Hz
+		
+        //_pos(ORB_ID(vehicle_local_position), 20, 0, &getSubscriptions()),
+		//publications
+		_actuators(ORB_ID(actuator_controls),-1, &getPublications()),
+        _att_sp(ORB_ID(vehicle_secondary_attitude_setpoint),-1,&getPublications())
+{}
+
+BlockINLoop::~BlockINLoop() {};
+
+
+
+
+
+BlockTASKLoop::BlockTASKLoop(SuperBlock *parent, const char *name):SuperBlock(parent,name),
+        // subscriptions
+        //_att(ORB_ID(vehicle_attitude),20,0,&getSubscriptions()),
+
+        //_img_moments(ORB_ID(img_moments),20,0,&getSubscriptions()),
+        //_img_point(ORB_ID(img_point),20,0,&getSubscriptions()),
+        //_img_line(ORB_ID(img_line),20,0,&getSubscriptions()),
+		
+		//modified by yunzhi
+		//_vel_sp_LIN(ORB_ID(vehicle_global_velocity_setpoint), 20, 0, &getSubscriptions()),
+		_vicon(ORB_ID(vicon), 20, 0, &getSubscriptions()),
+		_ctrl_state(ORB_ID(control_state), 20, 0, &getSubscriptions()),
+        _status(ORB_ID(vehicle_status), 20, 0, &getSubscriptions()),
+        _param_update(ORB_ID(parameter_update), 1000, 0, &getSubscriptions()), // limit to 1 Hz
+        _pos(ORB_ID(vehicle_local_position), 20, 0, &getSubscriptions()),
+        //publications
+		_att_sp(ORB_ID(vehicle_secondary_attitude_setpoint),-1,&getPublications()),
+		_actuators(ORB_ID(actuator_controls),-1, &getPublications())
+{}
+
+BlockTASKLoop::~BlockTASKLoop() {};
+}// namespace control

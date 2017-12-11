@@ -55,6 +55,8 @@
 #include <arch/board/board.h>
 #include <poll.h>
 #include <uORB/topics/vicon.h>
+#include <mathlib/mathlib.h>
+
 
 
 /**
@@ -91,6 +93,18 @@ int print_vicon_status() {
 		PX4_INFO("pos: (%2.3f,%2.3f,%2.3f)",(double)data.p[0],(double)data.p[1],(double)data.p[2]);
 		PX4_INFO("vel: (%2.3f,%2.3f,%2.3f)",(double)data.v[0],(double)data.v[2],(double)data.v[2]);
 		PX4_INFO("q: (%2.3f,%2.3f,%2.3f,%2.3f)",(double)data.q[0],(double)data.q[1],(double)data.q[2],(double)data.q[3]);
+		
+
+		matrix::Eulerf Eta=matrix::Quatf((double)data.q[0],(double)data.q[1],(double)data.q[2],(double)data.q[3]);
+		
+		PX4_INFO("Eta: (%2.3f,%2.3f,%2.3f)",(double)Eta(0),(double)Eta(1),(double)Eta(2));
+		
+		float roll =	atan2f(2.0f * (data.q[0] * data.q[1] + data.q[2] * data.q[3]), 1.0f - 2.0f * (data.q[1] * data.q[1] + data.q[2] * data.q[2])); 
+		float  pitch = asinf(2.0f * (data.q[0] * data.q[2] - data.q[3] * data.q[1])); 
+    	float 	yaw = atan2f(2.0f * (data.q[0] * data.q[3] + data.q[1] * data.q[2]), 1.0f - 2.0f * (data.q[2] * data.q[2] + data.q[3] * data.q[3])); 
+
+		PX4_INFO("COMP: (%2.3f,%2.3f,%2.3f)",(double)roll,(double)pitch,(double)yaw);
+
 		PX4_INFO("received @ %" PRIu64 " / %" PRIu64 "\n      sent @ %" PRIu64, data.t_local, hrt_absolute_time(), data.t_remote);
 		sub = orb_unsubscribe(sub);
 	} else {
