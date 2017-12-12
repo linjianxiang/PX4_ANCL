@@ -72,6 +72,7 @@ public:
 		_final_control.push_back(0);
 		_final_control.push_back(0);
 
+		//for publishing
 		_actuators_0_pub=nullptr;
 
 		_roll_rate_max=param_find("TASK_RRATE_MAX");
@@ -132,6 +133,7 @@ private:
 	param_t _roll_rate_max;
 	param_t _pitch_rate_max;
 	param_t _yaw_rate_max;
+	
 	float _roll_rate_max_val;
 	float _pitch_rate_max_val;
 	float _yaw_rate_max_val;

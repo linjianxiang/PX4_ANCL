@@ -50,7 +50,7 @@
  * @group Multicopter TASK Control
  */
 
-PARAM_DEFINE_FLOAT(TASK_PID_X_P, 0.09f);
+PARAM_DEFINE_FLOAT(TASK_PID_X_P, 0.35f);
 
 /**
  * Gain for image around image y axis in Body frame (Camera Frame)
@@ -62,7 +62,7 @@ PARAM_DEFINE_FLOAT(TASK_PID_X_P, 0.09f);
  * @increment 0.01
  * @group Multicopter TASK Control
  */
-PARAM_DEFINE_FLOAT(TASK_PID_Y_P, 0.15f);
+PARAM_DEFINE_FLOAT(TASK_PID_Y_P, 0.35f);
 
 /**
  * Gain for image around image z axis  in Body frame (Camera Frame)
@@ -74,7 +74,7 @@ PARAM_DEFINE_FLOAT(TASK_PID_Y_P, 0.15f);
  * @increment 0.001
  * @group Multicopter TASK Control
  */
-PARAM_DEFINE_FLOAT(TASK_PID_Z_P, 0.16f);
+PARAM_DEFINE_FLOAT(TASK_PID_Z_P, 0.25f);
 
 
 /**
@@ -87,7 +87,7 @@ PARAM_DEFINE_FLOAT(TASK_PID_Z_P, 0.16f);
  * @decimal 3
  * @group Multicopter TASK Control
  */
-PARAM_DEFINE_FLOAT(TASK_PID_X_I, 0.02f);
+PARAM_DEFINE_FLOAT(TASK_PID_X_I, 0.14f);
 
 /**
  * Integral gain for horizontal velocity error
@@ -99,7 +99,7 @@ PARAM_DEFINE_FLOAT(TASK_PID_X_I, 0.02f);
  * @decimal 3
  * @group Multicopter TASK Control
  */
-PARAM_DEFINE_FLOAT(TASK_PID_Y_I, 0.02f);
+PARAM_DEFINE_FLOAT(TASK_PID_Y_I, 0.14f);
 
 /**
  * Integral gain for vertical velocity error
@@ -136,7 +136,7 @@ PARAM_DEFINE_FLOAT(TASK_YAW_P,0.6f);
  * @increment 0.001
  * @group Multicopter TASK Control
  */
-PARAM_DEFINE_FLOAT(TASK_PID_X_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(TASK_PID_X_I_MAX, 0.2f);
 
 /**
  * y integral Saturation
@@ -148,7 +148,7 @@ PARAM_DEFINE_FLOAT(TASK_PID_X_I_MAX, 0.035f);
  * @increment 0.001
  * @group Multicopter TASK Control
  */
-PARAM_DEFINE_FLOAT(TASK_PID_Y_I_MAX, 0.035f);
+PARAM_DEFINE_FLOAT(TASK_PID_Y_I_MAX, 0.2f);
 
 /**
  * z integral Saturation
@@ -232,7 +232,7 @@ PARAM_DEFINE_FLOAT(TASK_PID_Z_D_LP, 0.1f);
  * @group Multicopter TASK Control
  */
 
-PARAM_DEFINE_FLOAT(TASK_POSX_P, 0.95f);
+PARAM_DEFINE_FLOAT(TASK_POSX_P, 1.3f);
 
 /**
  * Proportional gain for horizontal position error
@@ -243,7 +243,7 @@ PARAM_DEFINE_FLOAT(TASK_POSX_P, 0.95f);
  * @group Multicopter TASK Control
  */
 
-PARAM_DEFINE_FLOAT(TASK_POSY_P, 0.95f);
+PARAM_DEFINE_FLOAT(TASK_POSY_P, 1.3f);
 
 /**
  * Proportional gain for vertical position error

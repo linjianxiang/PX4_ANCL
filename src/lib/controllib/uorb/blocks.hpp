@@ -221,16 +221,7 @@ public:
 class __EXPORT BlockINLoop : public SuperBlock
 {
 protected:
-        //subscriptions
-        //uORB::Subscription<vehicle_attitude_s> _att;
 
-        //uORB::Subscription<img_moments_s> _img_moments;
-        //uORB::Subscription<img_point_s> _img_point;
-        //uORB::Subscription<img_line_s> _img_line;
-		
-		
-		//modified by yunzhi
-		//uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp_LIN;
 		uORB::Subscription<vicon_s> _vicon;
 		uORB::Subscription<vehicle_attitude_setpoint_s> _v_att_sp;
 		uORB::Subscription<control_state_s>_ctrl_state;
@@ -250,14 +241,7 @@ public:
 class __EXPORT BlockTASKLoop : public SuperBlock
 {
 protected:
-        //subscriptions
-        //uORB::Subscription<vehicle_attitude_s> _att;
 
-        //uORB::Subscription<img_moments_s> _img_moments;
-        //uORB::Subscription<img_point_s> _img_point;
-        //uORB::Subscription<img_line_s> _img_line;
-		//modified by yunzhi
-		//uORB::Subscription<vehicle_global_velocity_setpoint_s> _vel_sp_LIN;
 		uORB::Subscription<vicon_s> _vicon;
 		uORB::Subscription<control_state_s>_ctrl_state;
         uORB::Subscription<vehicle_status_s> _status;

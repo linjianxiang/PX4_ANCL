@@ -117,17 +117,17 @@ void BlockINController::update()
 			//large angle limitation
 			
 			//FIXME:
-			// if(_actuators.get().control[2]>0.2f)
-			// 	_actuators.get().control[2]=0.2f;
-			// else if(_actuators.get().control[2]<-0.2f)
-			// 	_actuators.get().control[2]=-0.2f;
+			if(_actuators.get().control[2]>0.2f)
+				_actuators.get().control[2]=0.2f;
+			else if(_actuators.get().control[2]<-0.2f)
+				_actuators.get().control[2]=-0.2f;
 			
-			// for (int i = 0; i < 2; i++) {
-			// if(_actuators.get().control[i]>0.6f)
-			// 	_actuators.get().control[i]=0.6f;
-			// else if(_actuators.get().control[i]<-0.6f)
-			// 	_actuators.get().control[i]=-0.6f;
-			// }
+			for (int i = 0; i < 2; i++) {
+			if(_actuators.get().control[i]>0.6f)
+				_actuators.get().control[i]=0.6f;
+			else if(_actuators.get().control[i]<-0.6f)
+				_actuators.get().control[i]=-0.6f;
+			}
 			
 			//test
 			//_att_sp.get().roll= _actuators.get().control[0];
@@ -138,23 +138,32 @@ void BlockINController::update()
 			
 			//PX4_INFO("sec:%8.4f",(double)_actuators.get().control[3]);
 
-			//for publishment
-			struct actuator_controls_s	_temp;			/**< actuator controls */
-			memset(&_temp, 0, sizeof(_temp));
-			_temp.control[0]= _actuators.get().control[0];
-			_temp.control[1]=_actuators.get().control[1];
-			_temp.control[2]=_actuators.get().control[2];
-			_temp.control[3]=_actuators.get().control[3];
-			_temp.timestamp=_actuators.get().timestamp;
+			//for publishment normal
+			// struct actuator_controls_s	_temp;			/**< actuator controls */
+			// memset(&_temp, 0, sizeof(_temp));
+			// _temp.control[0]= _actuators.get().control[0];
+			// _temp.control[1]=_actuators.get().control[1];
+			// _temp.control[2]=_actuators.get().control[2];
+			// _temp.control[3]=_actuators.get().control[3];
+			// _temp.timestamp=_actuators.get().timestamp;
 			
-			//final publishment
-			if (_actuators_0_pub != nullptr) {
-				orb_publish(ORB_ID(actuator_controls_0), _actuators_0_pub, &_temp);
-			}
-			else{
-				_actuators_0_pub = orb_advertise(ORB_ID(actuator_controls_0), &_temp);
-			}
+			// //final publishment
+			// if (_actuators_0_pub != nullptr) {
+			// 	orb_publish(ORB_ID(actuator_controls_0), _actuators_0_pub, &_temp);
+			// }
+			// else{
+			// 	_actuators_0_pub = orb_advertise(ORB_ID(actuator_controls_0), &_temp);
+			// }
 		
+
+
+			//test
+			_att_sp.get().roll= _actuators.get().control[0];
+			_att_sp.get().pitch= _actuators.get().control[1];
+			_att_sp.get().yaw=_actuators.get().control[2];
+			_att_sp.get().thrust=_actuators.get().control[3];
+
+			
 		}
 	}
 	

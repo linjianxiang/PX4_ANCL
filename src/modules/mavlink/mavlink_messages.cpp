@@ -3946,7 +3946,13 @@ protected:
 
 			msg.time_boot_ms = att_sp.timestamp / 1000;
 			//TODO
-			mavlink_euler_to_quaternion(att_sp.roll, att_sp.pitch, att_sp.yaw, msg.q);
+			//mavlink_euler_to_quaternion(att_sp.roll, att_sp.pitch, att_sp.yaw, msg.q);
+			
+			msg.q[0]=att_sp.q[0];
+			msg.q[1]=att_sp.q[1];
+			msg.q[2]=att_sp.q[2];
+			msg.q[3]=att_sp.q[3];
+
 			msg.roll = att_sp.roll;
 			msg.pitch = att_sp.pitch;
 			msg.yaw = att_sp.yaw;
